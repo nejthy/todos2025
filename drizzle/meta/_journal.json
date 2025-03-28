@@ -8,6 +8,13 @@
       "when": 1743064955103,
       "tag": "0000_spooky_talos",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1743163050549,
+      "tag": "0001_large_mole_man",
+      "breakpoints": true
     }
   ]
 }
