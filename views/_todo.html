@@ -1,0 +1,6 @@
+<% if (todo.done) { %>
+    <a href="/todos/<%= todo.id %>/toggle" class="btn btn-success me-2">dokončeno</a>
+    <a href="/todos/<%= todo.id %>/remove" class="btn btn-danger">odebrat</a>
+  <% } else { %>
+    <a href="/todos/<%= todo.id %>/toggle" class="btn btn-outline-secondary">nedokončeno</a>
+  <% } %>

@@ -169,3 +169,22 @@ const sendTodosToAllConnections = async () => {
     connection.send(rendered)
   }
 }
+
+const sendTodoToAllConnections = async (id) => {
+  const todo = await getTodoById(id)
+
+  const rendered = await renderFile("views/_todo.html", {
+    todo,
+  })
+
+  for (const connection of connections.values()){
+    const data = JSON.stringify({
+      type: "todos",
+      html: rendered,
+    })
+    connection.send(rendered)
+  }
+  
+
+
+}
