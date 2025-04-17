@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "ava",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate"
   },

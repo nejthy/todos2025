@@ -1,6 +1,13 @@
+<h1 class="card-title"><%= todo.title %></h1>
+<p class="card-subtitle mb-2 text-muted">Priorita: <strong><%= todo.priority %></strong></p>
+<hr />
 <% if (todo.done) { %>
     <a href="/todos/<%= todo.id %>/toggle" class="btn btn-success me-2">dokončeno</a>
     <a href="/todos/<%= todo.id %>/remove" class="btn btn-danger">odebrat</a>
   <% } else { %>
     <a href="/todos/<%= todo.id %>/toggle" class="btn btn-outline-secondary">nedokončeno</a>
   <% } %>
+</div>
+</div>
+
+<hr />

@@ -15,16 +15,11 @@
 
     <div class="card">
       <div class="card-body">
-        <h1 class="card-title"><%= todo.title %></h1>
-        <p class="card-subtitle mb-2 text-muted">Priorita: <strong><%= todo.priority %></strong></p>
-        <hr />
+       
         <div id="todo">
         <%- include('_todo.html') %>
         </div>
-      </div>
-    </div>
-
-    <hr />
+    
 
     <h2 class="mt-4">Upravit todočko</h2>
     <form action="/todos/<%= todo.id %>" method="post" class="mt-3">
@@ -50,6 +45,22 @@
     
       <button type="submit" class="btn btn-primary">Uložit</button>
     </form>
+
+    <script>
+      const ws = new WebSocket("ws://localhost:3000/ws")
+
+      ws.addEventListener("message", (evt) => {
+        const { type, id, html } = JSON.parse(evt.data)
+
+        if (type === "todo" && id === <%= todo.id %>) {
+          const el = document.getElementById("todo")
+
+          el.innerHTML = html
+        } else if (type === "todoDeleted" && id === <%= todo.id %>) {
+          window.location.replace('/')
+        }
+      })
+    </script>
     
   </body>
 </html>
