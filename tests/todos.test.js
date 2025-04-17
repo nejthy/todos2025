@@ -34,7 +34,7 @@ test("getAllTodos returns all todos", async (t) => {
   t.is(todos[2].done, true)
 })
 
-test("updateTodoById updates fields", async (t) => {
+test("updateTodoById updates fields of todo by id", async (t) => {
   await db.insert(todosTable).values({
     id: 5,
     title: "Původní",
@@ -52,7 +52,7 @@ test("updateTodoById updates fields", async (t) => {
   t.is(updated.priority, "low")
 })
 
-test("deleteTodoById removes the todo", async (t) => {
+test("deleteTodoById removes todo by id", async (t) => {
   await db.insert(todosTable).values({
     id: 6,
     title: "Smazat mě",
