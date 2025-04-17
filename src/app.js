@@ -25,8 +25,7 @@ app.use(logger())
 app.use(serveStatic({ root: "public" }))
 
 app.get("/", async (c) => {
-  const todos = await db.select().from(todosTable).all()
-
+  const todos = await getAllTodos()
   const index = await renderFile("views/index.html", {
     title: "My todo app",
     todos,
@@ -71,13 +70,7 @@ app.post("/todos/:id", async (c) => {
 
   const form = await c.req.formData()
 
-  await db
-    .update(todosTable)
-    .set({
-      title: form.get("title"),
-      priority: form.get("priority"),
-    })
-    .where(eq(todosTable.id, id))
+  await updateTodoById(id)
 
   sendTodosToAllConnections()
   sendTodoDetailToAllConnections(id)
@@ -92,10 +85,7 @@ app.get("/todos/:id/toggle", async (c) => {
 
   if (!todo) return c.notFound()
 
-  await db
-    .update(todosTable)
-    .set({ done: !todo.done })
-    .where(eq(todosTable.id, id))
+  await updateTodoById(id)
 
   sendTodosToAllConnections()
   sendTodoDetailToAllConnections(id)
@@ -110,7 +100,7 @@ app.get("/todos/:id/remove", async (c) => {
 
   if (!todo) return c.notFound()
 
-  await db.delete(todosTable).where(eq(todosTable.id, id))
+  await deleteTodoById(id)
 
   sendTodosToAllConnections()
   sendTodoDeletedToAllConnections(id)
@@ -152,8 +142,39 @@ export const getTodoById = async (id) => {
   return todo
 }
 
+export const getAllTodos = async () => {
+  const todos = await db
+    .select()
+    .from(todosTable)
+    .all()
+
+  return todos
+}
+
+export const deleteTodoById = async (id) => {
+  const todo = await db
+    .delete()
+    .where(eq(todosTable.id, id))
+
+  return todo
+}
+
+export const updateTodoById = async (id) => {
+  const todo = await db
+  .update(todosTable)
+  .set({
+    title: form.get("title"),
+    priority: form.get("priority"),
+  })
+  .where(eq(todosTable.id, id))
+
+  return todo
+} 
+
+
+
 const sendTodosToAllConnections = async () => {
-  const todos = await db.select().from(todosTable).all()
+  const todos = await getAllTodos()
 
   const rendered = await renderFile("views/_todos.html", {
     todos,

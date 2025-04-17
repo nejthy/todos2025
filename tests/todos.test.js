@@ -13,6 +13,6 @@ test("getTodoById returns id", async (t) => {
     .values({ id: 1, title: "testovaci todo", done: false })
 
   const todo = await getTodoById(1)
-
+  
   t.is(todo.title, "testovaci todo")
 })
