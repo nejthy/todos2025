@@ -2,19 +2,19 @@ import { Hono } from "hono"
 import { logger } from "hono/logger"
 import { serveStatic } from "@hono/node-server/serve-static"
 import { renderFile } from "ejs"
-import { drizzle } from "drizzle-orm/libsql"
 import { todosTable } from "./schema.js"
-import { eq } from "drizzle-orm"
 import { createNodeWebSocket } from "@hono/node-ws"
 import { WSContext } from "hono/ws"
+import {
+  db,
+  getTodoById,
+  getAllTodos,
+  updateTodoById,
+  deleteTodoById,
+} from "./db.js"
 
-export const db = drizzle({
-  connection:
-    process.env.NODE_ENV === "test"
-      ? "file::memory:"
-      : "file:db.sqlite",
-  logger: process.env.NODE_ENV !== "test",
-})
+
+
 
 export const app = new Hono()
 
@@ -70,7 +70,10 @@ app.post("/todos/:id", async (c) => {
 
   const form = await c.req.formData()
 
-  await updateTodoById(id)
+  await updateTodoById(id, {
+    title: form.get("title"),
+    priority: form.get("priority"),
+  })
 
   sendTodosToAllConnections()
   sendTodoDetailToAllConnections(id)
@@ -85,7 +88,9 @@ app.get("/todos/:id/toggle", async (c) => {
 
   if (!todo) return c.notFound()
 
-  await updateTodoById(id)
+    await updateTodoById(id, {
+      done: !todo.done,
+    })
 
   sendTodosToAllConnections()
   sendTodoDetailToAllConnections(id)
@@ -131,45 +136,6 @@ app.get(
     }
   })
 )
-
-export const getTodoById = async (id) => {
-  const todo = await db
-    .select()
-    .from(todosTable)
-    .where(eq(todosTable.id, id))
-    .get()
-
-  return todo
-}
-
-export const getAllTodos = async () => {
-  const todos = await db
-    .select()
-    .from(todosTable)
-    .all()
-
-  return todos
-}
-
-export const deleteTodoById = async (id) => {
-  const todo = await db
-    .delete()
-    .where(eq(todosTable.id, id))
-
-  return todo
-}
-
-export const updateTodoById = async (id) => {
-  const todo = await db
-  .update(todosTable)
-  .set({
-    title: form.get("title"),
-    priority: form.get("priority"),
-  })
-  .where(eq(todosTable.id, id))
-
-  return todo
-} 
 
 
 
