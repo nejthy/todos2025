@@ -6,7 +6,7 @@ import { renderFile } from "ejs"
 import { drizzle } from "drizzle-orm/libsql"
 import { todosTable } from "./src/schema.js"
 import { eq } from "drizzle-orm"
-import { createNodeWebSocket } from '@hono/node-ws'
+import { createNodeWebSocket } from "@hono/node-ws"
 import { WSContext } from "hono/ws"
 
 const db = drizzle({
@@ -16,8 +16,7 @@ const db = drizzle({
 
 const app = new Hono()
 
-
-const { injectWebSocket, upgradeWebSocket } = 
+const { injectWebSocket, upgradeWebSocket } =
   createNodeWebSocket({ app })
 
 app.use(logger())
@@ -41,6 +40,8 @@ app.post("/todos", async (c) => {
     title: form.get("title"),
     done: false,
   })
+
+  sendTodosToAllConnections()
 
   return c.redirect("/")
 })
@@ -72,9 +73,12 @@ app.post("/todos/:id", async (c) => {
     .update(todosTable)
     .set({
       title: form.get("title"),
-      priority: form.get("priority"), 
+      priority: form.get("priority"),
     })
     .where(eq(todosTable.id, id))
+
+  sendTodosToAllConnections()
+  sendTodoDetailToAllConnections(id)
 
   return c.redirect(c.req.header("Referer"))
 })
@@ -92,7 +96,8 @@ app.get("/todos/:id/toggle", async (c) => {
     .where(eq(todosTable.id, id))
 
   sendTodosToAllConnections()
-  
+  sendTodoDetailToAllConnections(id)
+
   return c.redirect(c.req.header("Referer"))
 })
 
@@ -105,35 +110,35 @@ app.get("/todos/:id/remove", async (c) => {
 
   await db.delete(todosTable).where(eq(todosTable.id, id))
 
+  sendTodosToAllConnections()
+  sendTodoDeletedToAllConnections(id)
+
   return c.redirect("/")
 })
 
+/** @type{Set<WSContext<WebSocket>>} */
+const connections = new Set()
 
+app.get(
+  "/ws",
+  upgradeWebSocket((c) => {
+    console.log(c.req.path)
 
-//** @type{Set<WSContext<WebSocket>>} */
-const connections = new Set() 
-
-
-
-app.get("/ws", upgradeWebSocket((c) => {
-  console.log(c.req.path)
-  return {
-     onOpen: (ev, ws) => {
-      connections.add(ws)
-      console.log("onOpen")
-      
-     },
-     onClose: (evt, ws) => {
-      connections.delete(ws)
-      console.log("onClose")
-     },
-     onMessage: (evt, ws) => {
-      console.log("onMessage",evt.data)
-     }
-  }
+    return {
+      onOpen: (ev, ws) => {
+        connections.add(ws)
+        console.log("onOpen")
+      },
+      onClose: (evt, ws) => {
+        connections.delete(ws)
+        console.log("onClose")
+      },
+      onMessage: (evt, ws) => {
+        console.log("onMessage", evt.data)
+      },
+    }
   })
 )
-
 
 const server = serve(app, (info) => {
   console.log(
@@ -142,7 +147,6 @@ const server = serve(app, (info) => {
 })
 
 injectWebSocket(server)
-
 
 const getTodoById = async (id) => {
   const todo = await db
@@ -155,36 +159,47 @@ const getTodoById = async (id) => {
 }
 
 const sendTodosToAllConnections = async () => {
-  const todos =  await db.select().from(todosTable).all()
+  const todos = await db.select().from(todosTable).all()
 
   const rendered = await renderFile("views/_todos.html", {
-    todos
+    todos,
   })
 
-  for (const connection of connections.values()){
+  for (const connection of connections.values()) {
     const data = JSON.stringify({
       type: "todos",
       html: rendered,
     })
-    connection.send(rendered)
+
+    connection.send(data)
   }
 }
 
-const sendTodoToAllConnections = async (id) => {
+const sendTodoDetailToAllConnections = async (id) => {
   const todo = await getTodoById(id)
 
   const rendered = await renderFile("views/_todo.html", {
     todo,
   })
 
-  for (const connection of connections.values()){
+  for (const connection of connections.values()) {
     const data = JSON.stringify({
-      type: "todos",
+      type: "todo",
+      id,
       html: rendered,
     })
-    connection.send(rendered)
+
+    connection.send(data)
   }
-  
+}
 
+const sendTodoDeletedToAllConnections = async (id) => {
+  for (const connection of connections.values()) {
+    const data = JSON.stringify({
+      type: "todoDeleted",
+      id,
+    })
 
+    connection.send(data)
+  }
 }

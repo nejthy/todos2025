@@ -11,11 +11,8 @@
   </head>
   <body>
     <h1><%= title.toUpperCase() %></h1>
-
-    <div id="todos"><%- include('_todos.html') %></div>
-
    
-    <%- include('_todos.html') %>
+    <div id="todos"><%- include('_todos.html') %></div>
 
     <form method="post" action="/todos">
       <input name="title" />
@@ -33,7 +30,7 @@
 
         el.innerHTML = evt.data
       })
-      
+  
 
     </script>
   </body>
