@@ -20,6 +20,15 @@ export const getTodoById = async (id) => {
   return todo
 }
 
+export const createTodo = async (values) => {
+  return await db
+    .insert(todosTable)
+    .values(values)
+    .returning(todosTable)
+    .get()
+}
+
+
 export const getAllTodos = async () => {
   const todos = await db
     .select()
