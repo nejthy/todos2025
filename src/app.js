@@ -2,30 +2,26 @@ import { Hono } from "hono"
 import { logger } from "hono/logger"
 import { serveStatic } from "@hono/node-server/serve-static"
 import { renderFile } from "ejs"
-import { drizzle } from "drizzle-orm/libsql"
-import { todosTable } from "./schema.js"
-import { eq } from "drizzle-orm"
 import { createNodeWebSocket } from "@hono/node-ws"
 import { WSContext } from "hono/ws"
-
-export const db = drizzle({
-  connection:
-    process.env.NODE_ENV === "test"
-      ? "file::memory:"
-      : "file:db.sqlite",
-  logger: process.env.NODE_ENV !== "test",
-})
+import {
+  createTodo,
+  deleteTodo,
+  getAllTodos,
+  getTodoById,
+  updateTodo,
+} from "./db.js"
 
 export const app = new Hono()
 
 export const { injectWebSocket, upgradeWebSocket } =
   createNodeWebSocket({ app })
 
-app.use(logger())
+// app.use(logger())
 app.use(serveStatic({ root: "public" }))
 
 app.get("/", async (c) => {
-  const todos = await db.select().from(todosTable).all()
+  const todos = await getAllTodos()
 
   const index = await renderFile("views/index.html", {
     title: "My todo app",
@@ -38,7 +34,7 @@ app.get("/", async (c) => {
 app.post("/todos", async (c) => {
   const form = await c.req.formData()
 
-  await db.insert(todosTable).values({
+  await createTodo({
     title: form.get("title"),
     done: false,
   })
@@ -71,13 +67,10 @@ app.post("/todos/:id", async (c) => {
 
   const form = await c.req.formData()
 
-  await db
-    .update(todosTable)
-    .set({
-      title: form.get("title"),
-      priority: form.get("priority"),
-    })
-    .where(eq(todosTable.id, id))
+  await updateTodo(id, {
+    title: form.get("title"),
+    priority: form.get("priority"),
+  })
 
   sendTodosToAllConnections()
   sendTodoDetailToAllConnections(id)
@@ -92,10 +85,7 @@ app.get("/todos/:id/toggle", async (c) => {
 
   if (!todo) return c.notFound()
 
-  await db
-    .update(todosTable)
-    .set({ done: !todo.done })
-    .where(eq(todosTable.id, id))
+  await updateTodo(id, { done: !todo.done })
 
   sendTodosToAllConnections()
   sendTodoDetailToAllConnections(id)
@@ -110,7 +100,7 @@ app.get("/todos/:id/remove", async (c) => {
 
   if (!todo) return c.notFound()
 
-  await db.delete(todosTable).where(eq(todosTable.id, id))
+  await deleteTodo(id)
 
   sendTodosToAllConnections()
   sendTodoDeletedToAllConnections(id)
@@ -129,31 +119,16 @@ app.get(
     return {
       onOpen: (ev, ws) => {
         connections.add(ws)
-        console.log("onOpen")
       },
       onClose: (evt, ws) => {
         connections.delete(ws)
-        console.log("onClose")
-      },
-      onMessage: (evt, ws) => {
-        console.log("onMessage", evt.data)
       },
     }
   })
 )
 
-export const getTodoById = async (id) => {
-  const todo = await db
-    .select()
-    .from(todosTable)
-    .where(eq(todosTable.id, id))
-    .get()
-
-  return todo
-}
-
 const sendTodosToAllConnections = async () => {
-  const todos = await db.select().from(todosTable).all()
+  const todos = await getAllTodos()
 
   const rendered = await renderFile("views/_todos.html", {
     todos,
