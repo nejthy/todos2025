@@ -1,5 +1,4 @@
 import test from "ava"
-import { migrate } from "drizzle-orm/libsql/migrator"
 import {
   createTodo,
   db,
@@ -10,11 +9,7 @@ import {
 } from "../src/db.js"
 import { todosTable } from "../src/schema.js"
 
-test.before("run migrations", async () => {
-  await migrate(db, { migrationsFolder: "drizzle" })
-})
-
-test.afterEach("delete todos", async () => {
+test.beforeEach("delete todos", async () => {
   await db.delete(todosTable)
 })
 
