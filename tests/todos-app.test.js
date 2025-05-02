@@ -1,17 +1,12 @@
 import test from "ava"
 import { testClient } from "hono/testing"
-import { migrate } from "drizzle-orm/libsql/migrator"
 import { createTodo, db } from "../src/db.js"
 import { app } from "../src/app.js"
 import { todosTable } from "../src/schema.js"
 
 const client = testClient(app)
 
-test.before("run migrations", async () => {
-  await migrate(db, { migrationsFolder: "drizzle" })
-})
-
-test.afterEach("delete todos", async () => {
+test.beforeEach("delete todos", async () => {
   await db.delete(todosTable)
 })
 
