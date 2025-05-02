@@ -1,15 +1,17 @@
 import { drizzle } from "drizzle-orm/libsql"
 import { eq } from "drizzle-orm"
 import { todosTable } from "./schema.js"
+import { migrate } from "drizzle-orm/libsql/migrator"
+
+
+const isTest = process.env.NODE_ENV === "test"
 
 export const db = drizzle({
-    connection:
-      process.env.NODE_ENV === "test"
-        ? "file::memory:"
-        : "file:db.sqlite",
-    logger: process.env.NODE_ENV !== "test",
-  })
-  
+  connection: isTest ? "file::memory:" : "file:db.sqlite",
+  logger: !isTest,
+})
+
+await migrate(db, { migrationsFolder: "drizzle" })
 export const getTodoById = async (id) => {
   const todo = await db
     .select()
