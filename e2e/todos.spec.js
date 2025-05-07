@@ -1,15 +1,18 @@
 import { test, expect } from "@playwright/test"
 
-test("index page has title", async ({ page }) => {
+test.beforeEach("before", async ({ page }) => {
   await page.goto("/")
+})
 
-  await expect(page.getByText("MY TODO APP")).toBeDefined()
+test("index page has title", async ({ page }) => {
+
+
+  await expect(page.getByText("MY TODO APP")).toBeVisible()
 })
 
 test("form on index page creates new todos", async ({
   page,
 }) => {
-  await page.goto("/")
 
   await page.getByRole('textbox').fill("E2E todo")
   await page.getByText("Přidat todo").click()
@@ -19,7 +22,6 @@ test("form on index page creates new todos", async ({
 
 
 test("check text edit ", async ({ page }) => {
-  await page.goto("/")
 
   await page.getByText("E2E todo").click()
 
@@ -29,7 +31,6 @@ test("check text edit ", async ({ page }) => {
 })
 
 test("Change title on todo", async ({ page }) => {
-  await page.goto("/")
 
   await page.getByText("E2E todo").click()
 
@@ -40,7 +41,6 @@ test("Change title on todo", async ({ page }) => {
 })
 
 test("Change priority", async ({ page }) => {
-  await page.goto("/")
 
   await page.getByText("Koupit psa").click()
 
@@ -56,7 +56,6 @@ test("Change priority", async ({ page }) => {
 
 
 test("Change from undone to done", async ({ page }) => {
-  await page.goto("/")
 
   await page.getByText("Koupit psa").click()
 
@@ -68,7 +67,6 @@ test("Change from undone to done", async ({ page }) => {
 })
 
 test("Delete todo", async ({ page }) => {
-  await page.goto("/")
 
   await page.getByText("Koupit psa").click()
 
