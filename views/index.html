@@ -9,6 +9,9 @@
     <title>Document</title>
   </head>
   <body>
+    <% if (user) { %>
+    <h1><%= user.username %></h1>
+    <% } %>
     <h1><%= title.toUpperCase() %></h1>
 
     <div id="todos"><%- include('_todos.html') %></div>
