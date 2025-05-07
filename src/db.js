@@ -1,7 +1,8 @@
 import { drizzle } from "drizzle-orm/libsql"
 import { eq } from "drizzle-orm"
-import { todosTable } from "./schema.js"
+import { todosTable, usersTable } from "./schema.js"
 import { migrate } from "drizzle-orm/libsql/migrator"
+import crypto from 'crypto'
 
 
 const isTest = process.env.NODE_ENV === "test"
@@ -55,3 +56,33 @@ export const updateTodoById = async (id, updates) => {
 
   return result
 }
+
+export const createUser = async (username, password) => {
+  const salt = crypto.randomBytes(16).toString('hex')
+  const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex')
+  const token = crypto.randomBytes(16).toString('hex')
+
+  return await db
+  .insert(usersTable)
+  .values(values)
+  .returning(usersTable)
+  .get() // dodelat createUser
+
+}
+
+export const getUser = async (username, password) => {
+  const user = await db
+    .select(username)
+    .from(usersTable)
+    .where(eq(usersTable.username, username))
+
+  if (!user) return null
+
+  const hashedPassword = crypto.pbkdf2Sync(password, user.salt, 100000, 64, "sha512").toString("hex")
+
+  if (user.hashedPassword !== hashedPassword) return null
+
+  return user
+  
+}
+
