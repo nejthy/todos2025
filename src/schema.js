@@ -12,7 +12,7 @@ export const todosTable = sqliteTable("todos", {
   priority: text({ enum: ["low", "normal", "high"] })
     .notNull()
     .default("normal"),
-  userId: int(),
+  userId: int().references(() => usersTable.id),
 })
 
 export const usersTable = sqliteTable("users", {

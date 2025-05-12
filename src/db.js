@@ -2,19 +2,35 @@ import crypto from "crypto"
 import { drizzle } from "drizzle-orm/libsql"
 import { eq } from "drizzle-orm"
 import { migrate } from "drizzle-orm/libsql/migrator"
-import { todosTable, usersTable } from "./schema.js"
+import {
+  todosTable,
+  todosRelations,
+  usersTable,
+  usersRelations,
+} from "./schema.js"
 
 const isTest = process.env.NODE_ENV === "test"
 
 export const db = drizzle({
   connection: isTest ? "file::memory:" : "file:db.sqlite",
-  logger: !isTest,
 })
 
 await migrate(db, { migrationsFolder: "drizzle" })
 
 export const getAllTodos = async () => {
-  const todos = await db.select().from(todosTable).all()
+  const results = await db
+    .select()
+    .from(todosTable)
+    .leftJoin(
+      usersTable,
+      eq(todosTable.userId, usersTable.id)
+    )
+    .all()
+
+  const todos = results.map((result) => ({
+    ...result.todos,
+    user: result.users,
+  }))
 
   return todos
 }
