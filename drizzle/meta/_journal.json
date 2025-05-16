@@ -15,6 +15,20 @@
       "when": 1747390122411,
       "tag": "0001_flawless_mysterio",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1747400839368,
+      "tag": "0002_milky_warbound",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1747400902673,
+      "tag": "0003_condemned_gwen_stacy",
+      "breakpoints": true
     }
   ]
 }

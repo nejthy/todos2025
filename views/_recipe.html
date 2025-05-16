@@ -1,29 +1,27 @@
-<% recipes.forEach(recipe => { %>
-  <div class="card mb-3">
-    <div class="card-body">
-      <h3><%= recipe.title %></h3>
+<div class="card mb-3">
+  <div class="card-body">
+    <h3><%= recipe.title %></h3>
 
-      <p><strong>Ingredience:</strong> <%= recipe.ingredients %></p>
-      <p><strong>Postup:</strong> <%= recipe.steps %></p>
+    <p><strong>Ingredience:</strong> <%= recipe.ingredients %></p>
+    <p><strong>Postup:</strong> <%= recipe.steps %></p>
 
-      <p>
-        <strong>Hodnocení:</strong>
-        <%= recipe.averageRating ? recipe.averageRating.toFixed(1) : "Žádné hodnocení zatím" %> ★
-        (<%= recipe.votesCount || 0 %> hlasů)
-      </p>
+    <p>
+      <strong>Hodnocení:</strong>
+      <%= recipe.averageRating ? recipe.averageRating.toFixed(1) : "Žádné hodnocení zatím" %> ★
+      (<%= recipe.votesCount || 0 %> hlasů)
+    </p>
 
-      <!-- Formulář pro přidání hodnocení -->
-      <form method="POST" action="/recipes/<%= recipe.id %>/rate" class="d-flex align-items-center gap-2">
-        <label for="rating-<%= recipe.id %>" class="form-label m-0">Dej hodnocení:</label>
-        <select name="rating" id="rating-<%= recipe.id %>" class="form-select form-select-sm w-auto">
-          <option value="1">1 ★</option>
-          <option value="2">2 ★</option>
-          <option value="3">3 ★</option>
-          <option value="4">4 ★</option>
-          <option value="5">5 ★</option>
-        </select>
-        <button type="submit" class="btn btn-sm btn-primary">Odeslat</button>
-      </form>
-    </div>
+    <!-- Formulář pro přidání hodnocení -->
+    <form method="POST" action="/recipes/<%= recipe.id %>/rate" class="d-flex align-items-center gap-2">
+      <label for="rating-<%= recipe.id %>" class="form-label m-0">Dej hodnocení:</label>
+      <select name="rating" id="rating-<%= recipe.id %>" class="form-select form-select-sm w-auto">
+        <option value="1">1 ★</option>
+        <option value="2">2 ★</option>
+        <option value="3">3 ★</option>
+        <option value="4">4 ★</option>
+        <option value="5">5 ★</option>
+      </select>
+      <button type="submit" class="btn btn-sm btn-primary">Odeslat</button>
+    </form>
   </div>
-<% }) %>
+</div>

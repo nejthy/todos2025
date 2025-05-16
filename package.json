@@ -9,8 +9,7 @@
     "test": "ava tests",
     "e2e": "playwright test --ui",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "e2e": "playwright test --ui"
+    "db:migrate": "drizzle-kit migrate"
   },
   "author": "Natalie Kuzelova",
   "license": "MIT",
@@ -22,7 +21,8 @@
     "drizzle-kit": "^0.30.5",
     "drizzle-orm": "^0.41.0",
     "ejs": "^3.1.10",
-    "hono": "^4.7.4"
+    "hono": "^4.7.4",
+    "sharp": "^0.34.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.52.0",

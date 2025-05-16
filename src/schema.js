@@ -6,17 +6,15 @@ import {
 } from "drizzle-orm/sqlite-core"
 import { relations } from "drizzle-orm"
 
-// Tabulka receptů
 export const recipesTable = sqliteTable("recipes", {
   id: int().primaryKey({ autoIncrement: true }),
   title: text().notNull(),
-  ingredients: text().notNull(), // čárkami oddělené ingredience
-  steps: text().notNull(),       // postup receptu
-  averageRating: real().default(0), // průměrné hodnocení
-  votesCount: int().default(0),     // počet hlasů
+  ingredients: text().notNull(), 
+  steps: text().notNull(),       
+  averageRating: real().default(0), 
+  votesCount: int().default(0),     
   userId: int().references(() => usersTable.id),
-  imagePath: text().notNull().default("default.jpg"),
-
+  imagePath: text()
 })
 
 export const usersTable = sqliteTable("users", {

@@ -1,3 +1,4 @@
+import sharp from 'sharp'
 import { Hono } from "hono"
 import { serveStatic } from "@hono/node-server/serve-static"
 import { renderFile } from "ejs"
@@ -13,6 +14,8 @@ import {
 } from "./db.js"
 import { usersRouter } from "./users.js"
 import { getCookie } from "hono/cookie"
+import fs from "fs/promises";
+import path from "path";
 
 export const app = new Hono()
 
@@ -66,30 +69,53 @@ app.get("/recipes/:id", async (c) => {
 
   const detail = await renderFile("views/detail.html", {
     recipe,
+    user: c.get("user"), 
   })
 
   return c.html(detail)
 })
 
+
 app.post("/recipes/:id", async (c) => {
-  const id = Number(c.req.param("id"))
+  const id = Number(c.req.param("id"));
+  const recipe = await getRecipeById(id);
+  if (!recipe) return c.notFound();
 
-  const recipe = await getRecipeById(id)
-  if (!recipe) return c.notFound()
+  const form = await c.req.formData();
+  const image = form.get("image");
 
-  const form = await c.req.formData()
+  let imagePath = recipe.imagePath;
 
-  await updateRecipe(id, {
+  console.log("IMAGE DEBUG:", image);
+
+  const values = {
     title: form.get("title"),
     ingredients: form.get("ingredients"),
     steps: form.get("steps"),
-  })
+  };
+  
+  if (
+    image &&
+    typeof image.name === "string" &&
+    image.name !== "" &&
+    typeof image.arrayBuffer === "function"
+  ) {
+    const filename = `${Date.now()}-${image.name}`;
+    const filepath = path.join("public", "uploads", filename);
+    const buffer = Buffer.from(await image.arrayBuffer());
+  
+    await sharp(buffer).resize({width: 500}).toFile(filepath),
+    values.imagePath = filename;
+  
+  }
 
-  sendRecipesToAllConnections()
-  sendRecipeDetailToAllConnections(id)
+  await updateRecipe(id, values);
+  
+  sendRecipesToAllConnections();
+  sendRecipeDetailToAllConnections(id);
 
-  return c.redirect(c.req.header("Referer"))
-})
+  return c.redirect(c.req.header("Referer"));
+});
 
 app.get("/recipes/:id/remove", async (c) => {
   const id = Number(c.req.param("id"))
@@ -167,3 +193,6 @@ const sendRecipeDeletedToAllConnections = async (id) => {
     connection.send(data)
   }
 }
+
+
+

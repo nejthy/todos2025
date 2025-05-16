@@ -12,6 +12,9 @@
         <%= recipe.averageRating ? recipe.averageRating.toFixed(1) : "Žádné hodnocení zatím" %> ★
         (<%= recipe.votesCount || 0 %> hlasů)
       </p>
+      <% if (recipe.imagePath) { %>
+        <img src="/uploads/<%= recipe.imagePath %>" class="img-fluid mb-3" />
+      <% } %>
     </div>
   </div>
 <% }) %>

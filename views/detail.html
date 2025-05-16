@@ -10,34 +10,56 @@
     />
   </head>
   <body>
-    <a href="/">Recept</a>
+    <a href="/">Recepty</a>
     <hr />
-    <div id="todo">
-      <%- include('_recipe.html') %>
+    <div id="recipe">
+      <%- include('_recipe.html', { recipe, user }) %>
     </div>
     <hr />
-    <h2>Upravit todočko</h2>
-    <form action="/recipes/<%= recipe.id %>" method="post">
-      <label>Titulek</label>
-      <input name="title" value="<%= recipe.title %>" />
   
-      <button type="submit">Uložit</button>
-    </form>
+    <% if (user && user.id === recipe.userId) { %>
+      <h2>Upravit recept</h2>
+      <form action="/recipes/<%= recipe.id %>" method="post"  enctype="multipart/form-data">
+        <div class="mb-3">
+          <label for="title" class="form-label">Název receptu</label>
+          <input type="text" name="title" id="title" class="form-control" value="<%= recipe.title %>" required />
+        </div>
+    
+        <div class="mb-3">
+          <label for="ingredients" class="form-label">Ingredience</label>
+          <textarea name="ingredients" id="ingredients" rows="3" class="form-control" required><%= recipe.ingredients %></textarea>
+        </div>
+    
+        <div class="mb-3">
+          <label for="steps" class="form-label">Postup</label>
+          <textarea name="steps" id="steps" rows="5" class="form-control" required><%= recipe.steps %></textarea>
+        </div>
 
+        <div class="mb-3">
+          <label for="image" class="form-label">Obrázek receptu</label>
+          <input type="file" name="image" id="image" class="form-control" accept="image/*" />
+          <% if (recipe.imagePath) { %>
+            <img src="/uploads/<%= recipe.imagePath %>" class="img-fluid mb-3" />
+          <% } %>
+          
+        </div>
+    
+    
+        <button type="submit" class="btn btn-primary">Uložit</button>
+      </form>
+    <% } %>
+    
+  
     <script>
-      const ws = new WebSocket("ws://localhost:3000/ws")
-
+      const ws = new WebSocket("ws://localhost:3000/ws");
       ws.addEventListener("message", (evt) => {
-        const { type, id, html } = JSON.parse(evt.data)
-
+        const { type, id, html } = JSON.parse(evt.data);
         if (type === "recipe" && id === <%= recipe.id %>) {
-          const el = document.getElementById("recipe")
-
-          el.innerHTML = html
+          document.getElementById("recipe").innerHTML = html;
         } else if (type === "recipeDeleted" && id === <%= recipe.id %>) {
-          window.location.replace('/')
+          window.location.replace('/');
         }
-      })
+      });
     </script>
   </body>
-</html>
+  </html>
