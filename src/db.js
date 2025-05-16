@@ -1,8 +1,10 @@
 import { drizzle } from "drizzle-orm/libsql"
 import { eq } from "drizzle-orm"
-import { recipesTable, usersTable } from "./schema.js"
+import { recipesTable, usersTable, ratingsTable } from "./schema.js"
 import { migrate } from "drizzle-orm/libsql/migrator"
 import crypto from 'crypto'
+import { and } from "drizzle-orm"
+
 
 
 const isTest = process.env.NODE_ENV === "test"
@@ -123,4 +125,43 @@ export const getUserByToken = async (token) => {
     .get()
 
   return user
+}
+
+
+export const getRatingByUserAndRecipe = async (userId, recipeId) => {
+  return await db
+    .select()
+    .from(ratingsTable)
+    .where(and(eq(ratingsTable.userId, userId), eq(ratingsTable.recipeId, recipeId)))
+    .get()
+}
+
+export const createRating = async (userId, recipeId, rating) => {
+  return await db.insert(ratingsTable).values({
+    userId,
+    recipeId,
+    rating,
+  })
+}
+
+export const updateRating = async (id, rating) => {
+  return await db.update(ratingsTable)
+    .set({ rating })
+    .where(eq(ratingsTable.id, id))
+}
+
+export const getRatingsForRecipe = async (recipeId) => {
+  return await db
+    .select({ rating: ratingsTable.rating })
+    .from(ratingsTable)
+    .where(eq(ratingsTable.recipeId, recipeId))
+}
+
+export const updateRecipeRatingStats = async (recipeId, average, count) => {
+  return await db.update(recipesTable)
+    .set({
+      averageRating: average,
+      votesCount: count,
+    })
+    .where(eq(recipesTable.id, recipeId))
 }

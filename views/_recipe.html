@@ -1,6 +1,9 @@
 <div class="card mb-3">
   <div class="card-body">
     <h3><%= recipe.title %></h3>
+    <% if (recipe.imagePath) { %>
+      <img src="/uploads/<%= recipe.imagePath %>" class="img-fluid mt-2" />
+    <% } %></a>
 
     <p><strong>Ingredience:</strong></p>
     <ul>
@@ -8,6 +11,8 @@
         <li><%= i.trim() %></li>
       <% }) %>
     </ul>
+    <strong>Kategorie:</strong> <%= recipe.category %>
+
         <p><strong>Postup:</strong> <%= recipe.steps %></p>
 
     <p>

@@ -11,19 +11,21 @@
   </head>
   <body class="container mt-4">
     <% if (user) { %>
-      <div class="mb-3">
-        <strong>Přihlášený uživatel:</strong> <%= user.username %>
-      </div>
-      <div class="mb-3">
-        <a class="btn btn-primary btn-danger" href="/logout">Odhlásit se</a>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <strong>Přihlášený uživatel:</strong> <%= user.username %>
+        </div>
+        <div>
+          <a class="btn btn-danger btn-sm" href="/logout">Odhlásit se</a>
+        </div>
       </div>
     <% } else { %>
-     
       <div class="mb-3">
         <a class="btn btn-primary me-2" href="/register">Registrovat se</a>
         <a class="btn btn-success" href="/login">Přihlásit se</a>
       </div>
     <% } %>
+    
   
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1 class="mb-0"><%= title.toUpperCase() %></h1>

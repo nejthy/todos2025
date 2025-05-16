@@ -11,6 +11,11 @@ import {
   getRecipeById,
   getUserByToken,
   updateRecipe,
+  getRatingByUserAndRecipe,
+  createRating,
+  updateRating,
+  getRatingsForRecipe,
+  updateRecipeRatingStats,
 } from "./db.js"
 import { usersRouter } from "./users.js"
 import { getCookie } from "hono/cookie"
@@ -58,6 +63,43 @@ app.get("/recipes/new", async (c) => {
 
 
 
+app.post("/recipes/:id/rate", async (c) => {
+  const id = Number(c.req.param("id"));
+  const form = await c.req.formData();
+  const rating = Number(form.get("rating"));
+  const user = c.get("user");
+
+  if (!user) return c.redirect("/login");
+
+  const existing = await getRatingByUserAndRecipe(user.id, id);
+
+  if (existing) {
+    await updateRating(existing.id, rating);
+  } else {
+    await createRating(user.id, id, rating);
+  }
+
+  const ratings = await getRatingsForRecipe(id);
+  const count = ratings.length;
+  const total = ratings.reduce((sum, r) => sum + r.rating, 0);
+  const average = total / count;
+
+  await updateRecipeRatingStats(id, average, count);
+
+  sendRecipesToAllConnections();
+  sendRecipeDetailToAllConnections(id);
+
+  const path = c.req.path
+
+  if (path.startsWith(`/recipes/${id}`)){
+    return c.redirect(`/recipes/${id}`);
+  } else {
+    return c.redirect("/");
+  } 
+  
+
+});
+
 app.post("/recipes/new", async (c) => {
   const form = await c.req.formData();
   const image = form.get("image");
@@ -72,6 +114,7 @@ app.post("/recipes/new", async (c) => {
     steps: form.get("steps"),
     user: c.get("user"),
     imagePath: "default.jpg", 
+    category: form.get("category")
   };
 
   if (
@@ -116,6 +159,7 @@ app.get("/recipes/:id", async (c) => {
 })
 
 
+
 app.post("/recipes/:id", async (c) => {
   const id = Number(c.req.param("id"));
   const recipe = await getRecipeById(id);
@@ -137,6 +181,8 @@ app.post("/recipes/:id", async (c) => {
     title: form.get("title"),
     ingredients: ingredientsString,
     steps: form.get("steps"),
+    category: form.get("category")
+
   };
   
   if (
