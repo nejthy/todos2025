@@ -13,6 +13,7 @@ export const db = drizzle({
 })
 
 await migrate(db, { migrationsFolder: "drizzle" })
+
 export const getTodoById = async (id) => {
   const todo = await db
     .select()
@@ -62,11 +63,13 @@ export const createUser = async (username, password) => {
   const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex')
   const token = crypto.randomBytes(16).toString('hex')
 
-  return await db
-  .insert(usersTable)
-  .values(values)
-  .returning(usersTable)
-  .get() // dodelat createUser
+ const user =  await db
+    .insert(usersTable)
+    .values({username,hashedPassword,salt,token})
+    .returning(usersTable)
+    .get() 
+
+  return user
 
 }
 
