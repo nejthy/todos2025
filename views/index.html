@@ -15,11 +15,15 @@
         <strong>Přihlášený uživatel:</strong> <%= user.username %>
       </div>
     <% } else { %>
+     
       <div class="mb-3">
         <a class="btn btn-primary me-2" href="/register">Registrovat se</a>
         <a class="btn btn-success" href="/login">Přihlásit se</a>
       </div>
     <% } %>
+    <div>
+      <a href="/recipes/new">Přidat nový recept</a>
+    </div>
 
     <h1 class="mb-4"><%= title.toUpperCase() %></h1>
 

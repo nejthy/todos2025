@@ -14,7 +14,6 @@ import {
 } from "./db.js"
 import { usersRouter } from "./users.js"
 import { getCookie } from "hono/cookie"
-import fs from "fs/promises";
 import path from "path";
 
 export const app = new Hono()
@@ -45,20 +44,57 @@ app.get("/", async (c) => {
   return c.html(index)
 })
 
-app.post("/recipes", async (c) => {
-  const form = await c.req.formData()
+app.get("/recipes/new", async (c) => {
+  const html = await renderFile("views/new.recipe.html", {
+    user: c.get("user"),
+  });
 
-  await createRecipe({
+  return c.html(html);
+});
+
+
+app.post("/recipes/new", async (c) => {
+  const form = await c.req.formData();
+  const image = form.get("image");
+
+  const ingredientsArray = form.getAll("ingredients[]"); 
+  const ingredientsString = ingredientsArray.join(", "); 
+
+
+  const values = {
     title: form.get("title"),
-    ingredients: form.get("ingredients"),
+    ingredients: ingredientsString,
     steps: form.get("steps"),
     user: c.get("user"),
-  })
+    imagePath: "default.jpg", 
+  };
 
-  sendRecipesToAllConnections()
+  if (
+    image &&
+    typeof image.name === "string" &&
+    image.name !== "" &&
+    typeof image.arrayBuffer === "function"
+  ) {
+    const filename = `${Date.now()}-${image.name}`;
+    const filepath = path.join("public", "uploads", filename);
+    const buffer = Buffer.from(await image.arrayBuffer());
 
-  return c.redirect("/")
-})
+    await sharp(buffer)
+      .resize({ width: 500 })
+      .toFile(filepath);
+
+    values.imagePath = filename;
+  }
+  console.log("🧪 user:", c.get("user"));
+
+  await createRecipe(values);
+  sendRecipesToAllConnections();
+
+  return c.redirect("/");
+});
+
+
+
 
 app.get("/recipes/:id", async (c) => {
   const id = Number(c.req.param("id"))
@@ -81,8 +117,13 @@ app.post("/recipes/:id", async (c) => {
   const recipe = await getRecipeById(id);
   if (!recipe) return c.notFound();
 
+
+
   const form = await c.req.formData();
   const image = form.get("image");
+
+  const ingredientsArray = form.getAll("ingredients[]");
+  const ingredientsString = ingredientsArray.join(", ");
 
   let imagePath = recipe.imagePath;
 
@@ -90,7 +131,7 @@ app.post("/recipes/:id", async (c) => {
 
   const values = {
     title: form.get("title"),
-    ingredients: form.get("ingredients"),
+    ingredients: ingredientsString,
     steps: form.get("steps"),
   };
   

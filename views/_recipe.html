@@ -2,8 +2,13 @@
   <div class="card-body">
     <h3><%= recipe.title %></h3>
 
-    <p><strong>Ingredience:</strong> <%= recipe.ingredients %></p>
-    <p><strong>Postup:</strong> <%= recipe.steps %></p>
+    <p><strong>Ingredience:</strong></p>
+    <ul>
+      <% recipe.ingredients.split(",").forEach(i => { %>
+        <li><%= i.trim() %></li>
+      <% }) %>
+    </ul>
+        <p><strong>Postup:</strong> <%= recipe.steps %></p>
 
     <p>
       <strong>Hodnocení:</strong>
