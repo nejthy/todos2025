@@ -15,6 +15,8 @@ export const recipesTable = sqliteTable("recipes", {
   averageRating: real().default(0), // průměrné hodnocení
   votesCount: int().default(0),     // počet hlasů
   userId: int().references(() => usersTable.id),
+  imagePath: text().notNull().default("default.jpg"),
+
 })
 
 export const usersTable = sqliteTable("users", {

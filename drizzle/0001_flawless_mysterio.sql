@@ -1,0 +1,1 @@
+ALTER TABLE `recipes` ADD `imagePath` text DEFAULT 'default.jpg' NOT NULL;
