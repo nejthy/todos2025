@@ -1,18 +1,19 @@
-import { relations } from "drizzle-orm"
 import {
   sqliteTable,
   int,
   text,
+  real,
 } from "drizzle-orm/sqlite-core"
 import { relations } from "drizzle-orm"
 
-export const todosTable = sqliteTable("todos", {
+// Tabulka receptů
+export const recipesTable = sqliteTable("recipes", {
   id: int().primaryKey({ autoIncrement: true }),
   title: text().notNull(),
-  done: int({ mode: "boolean" }).notNull(),
-  priority: text({ enum: ["low", "normal", "high"] })
-    .notNull()
-    .default("normal"),
+  ingredients: text().notNull(), // čárkami oddělené ingredience
+  steps: text().notNull(),       // postup receptu
+  averageRating: real().default(0), // průměrné hodnocení
+  votesCount: int().default(0),     // počet hlasů
   userId: int().references(() => usersTable.id),
 })
 
@@ -24,16 +25,17 @@ export const usersTable = sqliteTable("users", {
   token: text().notNull(),
 })
 
-export const todosRelations = relations(
-  todosTable,
-  ({ one }) => ({
-    user: one(usersTable),
-  })
-)
+export const recipesRelations = relations(recipesTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [recipesTable.userId],
+    references: [usersTable.id],
+  }),
+}));
+
 
 export const usersRelations = relations(
   usersTable,
   ({ many }) => ({
-    todos: many(todosTable),
+    recipes: many(recipesTable),
   })
 )

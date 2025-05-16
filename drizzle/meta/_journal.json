@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "6",
-      "when": 1743064955103,
-      "tag": "0000_spooky_talos",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "6",
-      "when": 1743163050549,
-      "tag": "0001_large_mole_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "6",
-      "when": 1746634878093,
-      "tag": "0002_clean_cardiac",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "6",
-      "when": 1746635754301,
-      "tag": "0003_true_vampiro",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "6",
-      "when": 1746636560045,
-      "tag": "0004_condemned_tarot",
+      "when": 1747388672032,
+      "tag": "0000_yummy_plazm",
       "breakpoints": true
     }
   ]

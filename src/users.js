@@ -2,7 +2,7 @@ import { renderFile } from "ejs"
 import { Hono } from "hono"
 import { createUser, db, getUser } from "./db.js"
 import { setCookie } from "hono/cookie"
-import { todosTable } from "./schema.js"
+import { recipesTable } from "./schema.js"
 import { eq } from "drizzle-orm"
 
 export const usersRouter = new Hono()
@@ -58,8 +58,8 @@ usersRouter.get("/mytodos", onlyForUsers, async (c) => {
 
   const todos = await db
     .select()
-    .from(todosTable)
-    .where(eq(todosTable.userId, user.id))
+    .from(recipesTable)
+    .where(eq(recipesTable.userId, user.id))
     .all()
 
   const index = await renderFile("views/index.html", {

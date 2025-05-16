@@ -1,0 +1,17 @@
+<% recipes.forEach(recipe => { %>
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5 class="card-title">
+        <a href="/recipes/<%= recipe.id %>"><%= recipe.title %></a>
+      </h5>
+      <% if (recipe.user && recipe.user.username) { %>
+        <p class="mb-1"><strong>Autor:</strong> <%= recipe.user.username %></p>
+      <% } %>
+      <p class="mb-0">
+        <strong>Hodnocení:</strong>
+        <%= recipe.averageRating ? recipe.averageRating.toFixed(1) : "Žádné hodnocení zatím" %> ★
+        (<%= recipe.votesCount || 0 %> hlasů)
+      </p>
+    </div>
+  </div>
+<% }) %>

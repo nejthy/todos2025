@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/libsql"
 import { eq } from "drizzle-orm"
-import { todosTable, usersTable } from "./schema.js"
+import { recipesTable, usersTable } from "./schema.js"
 import { migrate } from "drizzle-orm/libsql/migrator"
 import crypto from 'crypto'
 
@@ -14,54 +14,64 @@ export const db = drizzle({
 
 await migrate(db, { migrationsFolder: "drizzle" })
 
-export const getAllTodos = async () => {
+export const getAllRecipes = async () => {
   const results = await db
     .select()
-    .from(todosTable)
+    .from(recipesTable)
     .leftJoin(
       usersTable,
-      eq(todosTable.userId, usersTable.id)
+      eq(recipesTable.userId, usersTable.id)
     )
     .all()
 
-  const todos = results.map((result) => ({
-    ...result.todos,
+  const recipes = results.map((result) => ({
+    ...result.recipes,
     user: result.users,
   }))
 
-  return todos
+  return recipes
 }
 
-export const getTodoById = async (id) => {
-  const todo = await db
+export const getRecipeById = async (id) => {
+  const recipe = await db
     .select()
-    .from(todosTable)
-    .where(eq(todosTable.id, id))
+    .from(recipesTable)
+    .where(eq(recipesTable.id, id))
     .get()
 
-  return todo
+  return recipe
 }
 
-export const createTodo = async (values) => {
+export const deleteRecipeById = async (id) => {
+  const recipe = await db
+    .delete()
+    .where(eq(recipesTable.id, id))
+
+  return recipe
+}
+
+
+
+export const createRecipe = async (values) => {
   return await db
-    .insert(todosTable)
+    .insert(recipesTable)
     .values({
       ...values,
       userId: values.user ? values.user.id : null,
     })
-    .returning(todosTable)
+    .returning(recipesTable)
     .get()
 }
 
-export const updateTodo = async (id, values) => {
+export const updateRecipe = async (id, values) => {
   await db
-    .update(todosTable)
+    .update(recipesTable)
     .set(values)
-    .where(eq(todosTable.id, id))
+    .where(eq(recipesTable.id, id))
 }
 
-export const deleteTodo = async (id) => {
-  await db.delete(todosTable).where(eq(todosTable.id, id))
+export const deleteRecipe = async (id) => {
+  await db.delete(recipesTable).where(eq(recipesTable.id, id))
 }
 
 export const createUser = async (username, password) => {

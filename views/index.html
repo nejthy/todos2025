@@ -1,45 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="cs">
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todos</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Receptář</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
   </head>
-  <body>
+  <body class="container mt-4">
     <% if (user) { %>
-    <h1><%= user.username %></h1>
+      <div class="mb-3">
+        <strong>Přihlášený uživatel:</strong> <%= user.username %>
+      </div>
     <% } else { %>
-    <a href="/register">Registrovat se</a>
-    <a href="/login">Přihlásit se</a>
+      <div class="mb-3">
+        <a class="btn btn-primary me-2" href="/register">Registrovat se</a>
+        <a class="btn btn-success" href="/login">Přihlásit se</a>
+      </div>
     <% } %>
-    <h1><%= title.toUpperCase() %></h1>
+
+    <h1 class="mb-4"><%= title.toUpperCase() %></h1>
 
     <hr />
 
-    <div id="todos"><%- include('_todos.html') %></div>
+    <!-- Seznam receptů -->
+    <div id="recipes">
+      <%- include('_recipes.html') %>
+    </div>
 
-    <form method="post" action="/todos">
-      <label for="title">Název todo</label>
-      <input id="title" name="title" />
-      <button type="submit">Přidat todo</button>
-    </form>
+    <hr />
 
     <script>
-      const ws = new WebSocket("ws://localhost:3000/ws")
+      const ws = new WebSocket("ws://localhost:3000/ws");
 
       ws.addEventListener("message", (evt) => {
-        const { type, html } = JSON.parse(evt.data)
+        const { type, html } = JSON.parse(evt.data);
 
-        if (type === "todos") {
-          const el = document.getElementById("todos")
-
-          el.innerHTML = html
+        if (type === "recipes") {
+          const el = document.getElementById("recipes");
+          el.innerHTML = html;
         }
-      })
+      });
     </script>
   </body>
 </html>

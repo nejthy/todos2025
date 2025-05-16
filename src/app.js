@@ -1,27 +1,24 @@
 import { Hono } from "hono"
-import { logger } from "hono/logger"
 import { serveStatic } from "@hono/node-server/serve-static"
 import { renderFile } from "ejs"
-import { todosTable } from "./schema.js"
 import { createNodeWebSocket } from "@hono/node-ws"
 import { WSContext } from "hono/ws"
 import {
-  db,
-  getTodoById,
-  getAllTodos,
-  updateTodoById,
-  deleteTodoById,
+  createRecipe,
+  deleteRecipe,
+  getAllRecipes,
+  getRecipeById,
+  getUserByToken,
+  updateRecipe,
 } from "./db.js"
-
-
-
+import { usersRouter } from "./users.js"
+import { getCookie } from "hono/cookie"
 
 export const app = new Hono()
 
 export const { injectWebSocket, upgradeWebSocket } =
   createNodeWebSocket({ app })
 
-// app.use(logger())
 app.use(serveStatic({ root: "public" }))
 
 app.use(async (c, next) => {
@@ -34,91 +31,76 @@ app.use(async (c, next) => {
 app.route("/", usersRouter)
 
 app.get("/", async (c) => {
-  const todos = await getAllTodos()
+  const recipes = await getAllRecipes()
 
   const index = await renderFile("views/index.html", {
-    title: "My todo app",
-    todos,
+    title: "Recepty",
+    recipes,
     user: c.get("user"),
   })
 
   return c.html(index)
 })
 
-app.post("/todos", async (c) => {
+app.post("/recipes", async (c) => {
   const form = await c.req.formData()
 
-  await createTodo({
+  await createRecipe({
     title: form.get("title"),
-    done: false,
+    ingredients: form.get("ingredients"),
+    steps: form.get("steps"),
     user: c.get("user"),
   })
 
-  sendTodosToAllConnections()
+  sendRecipesToAllConnections()
 
   return c.redirect("/")
 })
 
-app.get("/todos/:id", async (c) => {
+app.get("/recipes/:id", async (c) => {
   const id = Number(c.req.param("id"))
 
-  const todo = await getTodoById(id)
+  const recipe = await getRecipeById(id)
 
-  if (!todo) return c.notFound()
+  if (!recipe) return c.notFound()
 
   const detail = await renderFile("views/detail.html", {
-    todo,
+    recipe,
   })
 
   return c.html(detail)
 })
 
-app.post("/todos/:id", async (c) => {
+app.post("/recipes/:id", async (c) => {
   const id = Number(c.req.param("id"))
 
-  const todo = await getTodoById(id)
-
-  if (!todo) return c.notFound()
+  const recipe = await getRecipeById(id)
+  if (!recipe) return c.notFound()
 
   const form = await c.req.formData()
 
-  await updateTodo(id, {
+  await updateRecipe(id, {
     title: form.get("title"),
-    priority: form.get("priority"),
+    ingredients: form.get("ingredients"),
+    steps: form.get("steps"),
   })
 
-  sendTodosToAllConnections()
-  sendTodoDetailToAllConnections(id)
+  sendRecipesToAllConnections()
+  sendRecipeDetailToAllConnections(id)
 
   return c.redirect(c.req.header("Referer"))
 })
 
-app.get("/todos/:id/toggle", async (c) => {
+app.get("/recipes/:id/remove", async (c) => {
   const id = Number(c.req.param("id"))
 
-  const todo = await getTodoById(id)
+  const recipe = await getRecipeById(id)
+  if (!recipe) return c.notFound()
 
-  if (!todo) return c.notFound()
+  await deleteRecipe(id)
 
-  await updateTodo(id, { done: !todo.done })
-
-  sendTodosToAllConnections()
-  sendTodoDetailToAllConnections(id)
-
-  return c.redirect(c.req.header("Referer"))
-})
-
-app.get("/todos/:id/remove", async (c) => {
-  const id = Number(c.req.param("id"))
-
-  const todo = await getTodoById(id)
-
-  if (!todo) return c.notFound()
-
-  await deleteTodo(id)
-
-  sendTodosToAllConnections()
-  sendTodoDeletedToAllConnections(id)
+  sendRecipesToAllConnections()
+  sendRecipeDeletedToAllConnections(id)
 
   return c.redirect("/")
 })
@@ -129,8 +111,6 @@ const connections = new Set()
 app.get(
   "/ws",
   upgradeWebSocket((c) => {
-    console.log(c.req.path)
-
     return {
       onOpen: (ev, ws) => {
         connections.add(ws)
@@ -142,16 +122,16 @@ app.get(
   })
 )
 
-const sendTodosToAllConnections = async () => {
-  const todos = await getAllTodos()
+const sendRecipesToAllConnections = async () => {
+  const recipes = await getAllRecipes()
 
-  const rendered = await renderFile("views/_todos.html", {
-    todos,
+  const rendered = await renderFile("views/_recipes.html", {
+    recipes,
   })
 
   for (const connection of connections.values()) {
     const data = JSON.stringify({
-      type: "todos",
+      type: "recipes",
       html: rendered,
     })
 
@@ -159,16 +139,16 @@ const sendTodosToAllConnections = async () => {
   }
 }
 
-const sendTodoDetailToAllConnections = async (id) => {
-  const todo = await getTodoById(id)
+const sendRecipeDetailToAllConnections = async (id) => {
+  const recipe = await getRecipeById(id)
 
-  const rendered = await renderFile("views/_todo.html", {
-    todo,
+  const rendered = await renderFile("views/_recipe.html", {
+    recipe,
   })
 
   for (const connection of connections.values()) {
     const data = JSON.stringify({
-      type: "todo",
+      type: "recipe",
       id,
       html: rendered,
     })
@@ -177,10 +157,10 @@ const sendTodoDetailToAllConnections = async (id) => {
   }
 }
 
-const sendTodoDeletedToAllConnections = async (id) => {
+const sendRecipeDeletedToAllConnections = async (id) => {
   for (const connection of connections.values()) {
     const data = JSON.stringify({
-      type: "todoDeleted",
+      type: "recipeDeleted",
       id,
     })
 
