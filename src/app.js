@@ -15,6 +15,8 @@ import {
 import { usersRouter } from "./users.js"
 import { getCookie } from "hono/cookie"
 import path from "path";
+import { deleteCookie } from "hono/cookie"
+
 
 export const app = new Hono()
 
@@ -45,12 +47,15 @@ app.get("/", async (c) => {
 })
 
 app.get("/recipes/new", async (c) => {
-  const html = await renderFile("views/new.recipe.html", {
-    user: c.get("user"),
-  });
+  const user = c.get("user");
+  if (!user) {
+    return c.redirect("/login");
+  }
 
+  const html = await renderFile("views/new.recipe.html", { user });
   return c.html(html);
 });
+
 
 
 app.post("/recipes/new", async (c) => {
@@ -80,12 +85,11 @@ app.post("/recipes/new", async (c) => {
     const buffer = Buffer.from(await image.arrayBuffer());
 
     await sharp(buffer)
-      .resize({ width: 500 })
+      .resize({ width: 300 })
       .toFile(filepath);
 
     values.imagePath = filename;
   }
-  console.log("🧪 user:", c.get("user"));
 
   await createRecipe(values);
   sendRecipesToAllConnections();
@@ -145,7 +149,7 @@ app.post("/recipes/:id", async (c) => {
     const filepath = path.join("public", "uploads", filename);
     const buffer = Buffer.from(await image.arrayBuffer());
   
-    await sharp(buffer).resize({width: 500}).toFile(filepath),
+    await sharp(buffer).resize({width: 300}).toFile(filepath),
     values.imagePath = filename;
   
   }
@@ -170,6 +174,13 @@ app.get("/recipes/:id/remove", async (c) => {
   sendRecipeDeletedToAllConnections(id)
 
   return c.redirect("/")
+})
+
+
+
+app.get("/logout", async (c) => {
+  deleteCookie(c, "token") // smaže cookie
+  return c.redirect("/")   // nebo c.redirect("/login")
 })
 
 /** @type{Set<WSContext<WebSocket>>} */

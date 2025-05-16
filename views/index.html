@@ -14,6 +14,9 @@
       <div class="mb-3">
         <strong>Přihlášený uživatel:</strong> <%= user.username %>
       </div>
+      <div class="mb-3">
+        <a class="btn btn-primary btn-danger" href="/logout">Odhlásit se</a>
+      </div>
     <% } else { %>
      
       <div class="mb-3">
@@ -21,11 +24,17 @@
         <a class="btn btn-success" href="/login">Přihlásit se</a>
       </div>
     <% } %>
-    <div>
-      <a href="/recipes/new">Přidat nový recept</a>
+  
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="mb-0"><%= title.toUpperCase() %></h1>
+    
+      <a href="<%= user ? '/recipes/new' : '/login' %>" class="btn btn-outline-primary">
+        + Přidat nový recept
+      </a>
+      
     </div>
+    
 
-    <h1 class="mb-4"><%= title.toUpperCase() %></h1>
 
     <hr />
 
