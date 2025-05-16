@@ -21,14 +21,25 @@ export const app = new Hono()
 export const { injectWebSocket, upgradeWebSocket } =
   createNodeWebSocket({ app })
 
-app.use(logger())
+// app.use(logger())
 app.use(serveStatic({ root: "public" }))
+
+app.use(async (c, next) => {
+  const token = getCookie(c, "token")
+  const user = await getUserByToken(token)
+  c.set("user", user)
+  await next()
+})
+
+app.route("/", usersRouter)
 
 app.get("/", async (c) => {
   const todos = await getAllTodos()
+
   const index = await renderFile("views/index.html", {
     title: "My todo app",
     todos,
+    user: c.get("user"),
   })
 
   return c.html(index)
@@ -37,9 +48,10 @@ app.get("/", async (c) => {
 app.post("/todos", async (c) => {
   const form = await c.req.formData()
 
-  await db.insert(todosTable).values({
+  await createTodo({
     title: form.get("title"),
     done: false,
+    user: c.get("user"),
   })
 
   sendTodosToAllConnections()
@@ -70,7 +82,7 @@ app.post("/todos/:id", async (c) => {
 
   const form = await c.req.formData()
 
-  await updateTodoById(id, {
+  await updateTodo(id, {
     title: form.get("title"),
     priority: form.get("priority"),
   })
@@ -88,9 +100,7 @@ app.get("/todos/:id/toggle", async (c) => {
 
   if (!todo) return c.notFound()
 
-    await updateTodoById(id, {
-      done: !todo.done,
-    })
+  await updateTodo(id, { done: !todo.done })
 
   sendTodosToAllConnections()
   sendTodoDetailToAllConnections(id)
@@ -105,7 +115,7 @@ app.get("/todos/:id/remove", async (c) => {
 
   if (!todo) return c.notFound()
 
-  await deleteTodoById(id)
+  await deleteTodo(id)
 
   sendTodosToAllConnections()
   sendTodoDeletedToAllConnections(id)
@@ -124,20 +134,13 @@ app.get(
     return {
       onOpen: (ev, ws) => {
         connections.add(ws)
-        console.log("onOpen")
       },
       onClose: (evt, ws) => {
         connections.delete(ws)
-        console.log("onClose")
-      },
-      onMessage: (evt, ws) => {
-        console.log("onMessage", evt.data)
       },
     }
   })
 )
-
-
 
 const sendTodosToAllConnections = async () => {
   const todos = await getAllTodos()
@@ -184,6 +187,3 @@ const sendTodoDeletedToAllConnections = async (id) => {
     connection.send(data)
   }
 }
-
-
-

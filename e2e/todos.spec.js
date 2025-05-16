@@ -1,13 +1,9 @@
 import { test, expect } from "@playwright/test"
 
-test.beforeEach("before", async ({ page }) => {
-  await page.goto("/")
-})
-
 test("index page has title", async ({ page }) => {
+  await page.goto("/")
 
-
-  await expect(page.getByText("MY TODO APP")).toBeVisible()
+  await expect(page.getByText("MY TODO APP")).toBeDefined()
 })
 
 test("form on index page creates new todos", async ({

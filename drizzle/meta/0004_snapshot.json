@@ -74,15 +74,25 @@
           "notNull": true,
           "autoincrement": false
         },
+<<<<<<< HEAD
         "token": {
           "name": "token",
+=======
+        "salt": {
+          "name": "salt",
+>>>>>>> upstream/main
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
+<<<<<<< HEAD
         "salt": {
           "name": "salt",
+=======
+        "token": {
+          "name": "token",
+>>>>>>> upstream/main
           "type": "text",
           "primaryKey": false,
           "notNull": true,

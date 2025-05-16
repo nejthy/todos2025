@@ -14,6 +14,24 @@ export const db = drizzle({
 
 await migrate(db, { migrationsFolder: "drizzle" })
 
+export const getAllTodos = async () => {
+  const results = await db
+    .select()
+    .from(todosTable)
+    .leftJoin(
+      usersTable,
+      eq(todosTable.userId, usersTable.id)
+    )
+    .all()
+
+  const todos = results.map((result) => ({
+    ...result.todos,
+    user: result.users,
+  }))
+
+  return todos
+}
+
 export const getTodoById = async (id) => {
   const todo = await db
     .select()
@@ -27,65 +45,72 @@ export const getTodoById = async (id) => {
 export const createTodo = async (values) => {
   return await db
     .insert(todosTable)
-    .values(values)
+    .values({
+      ...values,
+      userId: values.user ? values.user.id : null,
+    })
     .returning(todosTable)
     .get()
 }
 
-
-export const getAllTodos = async () => {
-  const todos = await db
-    .select()
-    .from(todosTable)
-    .all()
-
-  return todos
-}
-
-export const deleteTodoById = async (id) => {
-  return db
-    .delete(todosTable)
-    .where(eq(todosTable.id, id))
-}
-
-
-export const updateTodoById = async (id, updates) => {
-  const result = await db
+export const updateTodo = async (id, values) => {
+  await db
     .update(todosTable)
-    .set(updates)
+    .set(values)
     .where(eq(todosTable.id, id))
+}
 
-  return result
+export const deleteTodo = async (id) => {
+  await db.delete(todosTable).where(eq(todosTable.id, id))
 }
 
 export const createUser = async (username, password) => {
-  const salt = crypto.randomBytes(16).toString('hex')
-  const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex')
-  const token = crypto.randomBytes(16).toString('hex')
+  const salt = crypto.randomBytes(16).toString("hex")
+  const hashedPassword = crypto
+    .pbkdf2Sync(password, salt, 100000, 64, "sha512")
+    .toString("hex")
+  const token = crypto.randomBytes(16).toString("hex")
 
- const user =  await db
+  const user = await db
     .insert(usersTable)
-    .values({username,hashedPassword,salt,token})
+    .values({
+      username,
+      hashedPassword,
+      token,
+      salt,
+    })
     .returning(usersTable)
-    .get() 
+    .get()
 
   return user
-
 }
 
 export const getUser = async (username, password) => {
   const user = await db
-    .select(username)
+    .select()
     .from(usersTable)
     .where(eq(usersTable.username, username))
+    .get()
 
   if (!user) return null
 
-  const hashedPassword = crypto.pbkdf2Sync(password, user.salt, 100000, 64, "sha512").toString("hex")
+  const hashedPassword = crypto
+    .pbkdf2Sync(password, user.salt, 100000, 64, "sha512")
+    .toString("hex")
 
   if (user.hashedPassword !== hashedPassword) return null
 
   return user
-  
 }
 
+export const getUserByToken = async (token) => {
+  if (!token) return null
+
+  const user = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.token, token))
+    .get()
+
+  return user
+}

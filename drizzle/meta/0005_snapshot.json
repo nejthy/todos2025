@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "709888db-8c5a-49bb-9dab-b82b39bc7caf",
-  "prevId": "349d9c2c-5412-4160-bc66-4e870f7680f6",
+  "id": "69818b35-ac0f-4391-9ac9-8cca36c653bf",
+  "prevId": "c97ac433-e839-4ecd-a4b0-d3dec46a3b69",
   "tables": {
     "todos": {
       "name": "todos",
@@ -45,7 +45,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "todos_userId_users_id_fk": {
+          "name": "todos_userId_users_id_fk",
+          "tableFrom": "todos",
+          "tableTo": "users",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "checkConstraints": {}
@@ -74,32 +88,30 @@
           "notNull": true,
           "autoincrement": false
         },
-<<<<<<< HEAD
-        "token": {
-          "name": "token",
-=======
         "salt": {
           "name": "salt",
->>>>>>> upstream/main
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-<<<<<<< HEAD
-        "salt": {
-          "name": "salt",
-=======
         "token": {
           "name": "token",
->>>>>>> upstream/main
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "users_username_unique": {
+          "name": "users_username_unique",
+          "columns": [
+            "username"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},

@@ -9,41 +9,24 @@
       rel="stylesheet"
     />
   </head>
-  <body class="container py-4">
-
-    <a href="/" class="btn btn-link mb-3">← Zpět na seznam</a>
-
-    <div class="card">
-      <div class="card-body">
-       
-        <div id="todo">
-        <%- include('_todo.html') %>
-        </div>
-    
-
-    <h2 class="mt-4">Upravit todočko</h2>
-    <form action="/todos/<%= todo.id %>" method="post" class="mt-3">
-      <div class="mb-3">
-        <label for="title" class="form-label">Titulek</label>
-        <input
-          type="text"
-          class="form-control"
-          id="title"
-          name="title"
-          value="<%= todo.title %>"
-        />
-      </div>
-    
-      <div class="mb-3">
-        <label for="priority" class="form-label">Priorita</label>
-        <select class="form-select" id="priority" name="priority">
-          <option value="low" <%= todo.priority === 'low' ? 'selected' : '' %>>Low</option>
-          <option value="normal" <%= todo.priority === 'normal' ? 'selected' : '' %>>Normal</option>
-          <option value="high" <%= todo.priority === 'high' ? 'selected' : '' %>>High</option>
-        </select>
-      </div>
-    
-      <button type="submit" class="btn btn-primary">Uložit</button>
+  <body>
+    <a href="/">Todočka</a>
+    <hr />
+    <div id="todo">
+      <%- include('_todo.html') %>
+    </div>
+    <hr />
+    <h2>Upravit todočko</h2>
+    <form action="/todos/<%= todo.id %>" method="post">
+      <label>Titulek</label>
+      <input name="title" value="<%= todo.title %>" />
+      <label>Priorita</label>
+      <select name="priority">
+        <option value="low" <%= todo.priority === 'low' ? 'selected' : '' %>>Nízká</option>
+        <option value="normal" <%= todo.priority === 'normal' ? 'selected' : '' %>>Střední</option>
+        <option value="high" <%= todo.priority === 'high' ? 'selected' : '' %>>Vysoká</option>
+      </select>
+      <button type="submit">Uložit</button>
     </form>
 
     <script>
@@ -61,6 +44,9 @@
         }
       })
     </script>
+<<<<<<< HEAD
     
+=======
+>>>>>>> upstream/main
   </body>
 </html>
