@@ -1,5 +1,6 @@
 import sharp from 'sharp'
 import { Hono } from "hono"
+import { setCookie } from "hono/cookie"
 import { serveStatic } from "@hono/node-server/serve-static"
 import { renderFile } from "ejs"
 import { createNodeWebSocket } from "@hono/node-ws"
@@ -20,7 +21,6 @@ import {
 import { usersRouter } from "./users.js"
 import { getCookie } from "hono/cookie"
 import path from "path";
-import { deleteCookie } from "hono/cookie"
 
 
 export const app = new Hono()
@@ -69,7 +69,15 @@ app.post("/recipes/:id/rate", async (c) => {
   const rating = Number(form.get("rating"));
   const user = c.get("user");
 
-  if (!user) return c.redirect("/login");
+  if (!user) {
+    await setCookie(c, "flash", "Pro hodnocení se musíte přihlásit", {
+      path: "/",
+      httpOnly: false, 
+      maxAge: 5,       
+    });
+  
+    return c.redirect("/login");
+  }
 
   const existing = await getRatingByUserAndRecipe(user.id, id);
 
@@ -222,12 +230,6 @@ app.get("/recipes/:id/remove", async (c) => {
   return c.redirect("/")
 })
 
-
-
-app.get("/logout", async (c) => {
-  deleteCookie(c, "token") // smaže cookie
-  return c.redirect("/")   // nebo c.redirect("/login")
-})
 
 /** @type{Set<WSContext<WebSocket>>} */
 const connections = new Set()

@@ -1,9 +1,9 @@
 import { renderFile } from "ejs"
 import { Hono } from "hono"
 import { createUser, db, getUser } from "./db.js"
-import { setCookie } from "hono/cookie"
 import { recipesTable } from "./schema.js"
 import { eq } from "drizzle-orm"
+import { setCookie, getCookie, deleteCookie } from "hono/cookie"
 
 export const usersRouter = new Hono()
 
@@ -33,14 +33,21 @@ usersRouter.post("/register", async (c) => {
 })
 
 usersRouter.get("/login", async (c) => {
-  const rendered = await renderFile("views/login.html")
+  const flash = getCookie(c, "flash") || null;
+
+  if (flash) {
+    await deleteCookie(c, "flash"); 
+  }
+
+  const rendered = await renderFile("views/login.html", {
+    flash,})
 
   return c.html(rendered)
 })
 
 usersRouter.post("/login", async (c) => {
   const form = await c.req.formData()
-
+ 
   const user = await getUser(
     form.get("username"),
     form.get("password")
@@ -69,4 +76,9 @@ usersRouter.get("/mytodos", onlyForUsers, async (c) => {
   })
 
   return c.html(index)
+})
+
+usersRouter.get("/logout", async (c) => {
+  deleteCookie(c, "token") 
+  return c.redirect("/")   
 })

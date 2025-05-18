@@ -7,8 +7,18 @@
       content="width=device-width, initial-scale=1.0"
     />
     <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+
   </head>
   <body>
+    <% if (flash) { %>
+      <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <strong><%= flash %></strong>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
+      </div>
+    <% } %>
+  
     <h1>Přihlášení</h1>
     <form action="/login" method="post">
       <input
