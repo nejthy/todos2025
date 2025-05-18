@@ -99,11 +99,9 @@ app.post("/recipes/:id/rate", async (c) => {
 
   const path = c.req.path
 
-  if (path.startsWith(`/recipes/${id}`)){
-    return c.redirect(`/recipes/${id}`);
-  } else {
-    return c.redirect("/");
-  } 
+  return c.redirect(`/recipes/${id}`);
+
+
   
 
 });

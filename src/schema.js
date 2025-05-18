@@ -35,6 +35,10 @@ export const ratingsTable = sqliteTable("ratings", {
   rating: int().notNull(), // 1 až 5
 });
 
+export const favoritesTable = sqliteTable("favorites", {
+  userId: int().references(() => usersTable.id),
+  recipeId: int().references(() => recipesTable.id),
+});
 
 export const recipesRelations = relations(recipesTable, ({ one, many }) => ({
   user: one(usersTable, {
@@ -43,6 +47,8 @@ export const recipesRelations = relations(recipesTable, ({ one, many }) => ({
   }),
   ratings: many(ratingsTable),
 }));
+
+
 
 export const usersRelations = relations(usersTable, ({ many }) => ({
   recipes: many(recipesTable),

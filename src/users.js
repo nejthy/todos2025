@@ -14,7 +14,7 @@ const onlyForUsers = async (c, next) => {
 }
 
 usersRouter.get("/register", async (c) => {
-  const rendered = await renderFile("views/register.html")
+  const rendered = await renderFile("views/register.html",{ flash: null,})
 
   return c.html(rendered)
 })
@@ -22,10 +22,18 @@ usersRouter.get("/register", async (c) => {
 usersRouter.post("/register", async (c) => {
   const form = await c.req.formData()
 
+  const password = form.get("password")
+  const passwordConfirm = form.get("passwordConfirm")
+
+  if (password !== passwordConfirm) {
+    return c.html(await renderFile("views/register.html", { flash: "Hesla se neshodují" }));
+  }
+
   const user = await createUser(
     form.get("username"),
-    form.get("password")
+    form.get("password"),
   )
+ 
 
   setCookie(c, "token", user.token)
 
