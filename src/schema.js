@@ -32,7 +32,7 @@ export const ratingsTable = sqliteTable("ratings", {
   id: int().primaryKey({ autoIncrement: true }),
   userId: int().notNull().references(() => usersTable.id),
   recipeId: int().notNull().references(() => recipesTable.id),
-  rating: int().notNull(), // 1 až 5
+  rating: int().notNull(),
 });
 
 export const favoritesTable = sqliteTable("favorites", {
@@ -64,4 +64,9 @@ export const ratingsRelations = relations(ratingsTable, ({ one }) => ({
     fields: [ratingsTable.recipeId],
     references: [recipesTable.id],
   }),
+}));
+
+export const favoritesRelations = relations(favoritesTable, ({ one }) => ({
+  user: one(usersTable, { fields: [favoritesTable.userId], references: [usersTable.id] }),
+  recipe: one(recipesTable, { fields: [favoritesTable.recipeId], references: [recipesTable.id] }),
 }));

@@ -1,7 +1,6 @@
 import { drizzle } from "drizzle-orm/libsql"
 import { eq } from "drizzle-orm"
-import { recipesTable, usersTable, ratingsTable } from "./schema.js"
-import { migrate } from "drizzle-orm/libsql/migrator"
+import { recipesTable, usersTable, ratingsTable, favoritesTable } from "./schema.js"
 import crypto from 'crypto'
 import { and } from "drizzle-orm"
 
@@ -14,25 +13,34 @@ export const db = drizzle({
   logger: !isTest,
 })
 
-await migrate(db, { migrationsFolder: "drizzle" })
 
-export const getAllRecipes = async () => {
+export const getAllRecipes = async (userId) => {
   const results = await db
     .select()
     .from(recipesTable)
-    .leftJoin(
-      usersTable,
-      eq(recipesTable.userId, usersTable.id)
-    )
-    .all()
+    .leftJoin(usersTable, eq(recipesTable.userId, usersTable.id))
+    .all();
 
-  const recipes = results.map((result) => ({
+  let favorites = [];
+  if (userId) {
+    favorites = await db
+      .select({ recipeId: favoritesTable.recipeId })
+      .from(favoritesTable)
+      .where(eq(favoritesTable.userId, userId))
+      .all();
+  }
+
+  const favoriteIds = favorites.map(f => f.recipeId);
+
+  const recipes = results.map(result => ({
     ...result.recipes,
     user: result.users,
-  }))
+    isFavorite: favoriteIds.includes(result.recipes.id),
+  }));
 
-  return recipes
-}
+  return recipes;
+};
+
 
 export const getRecipeById = async (id) => {
   const recipe = await db
@@ -165,3 +173,21 @@ export const updateRecipeRatingStats = async (recipeId, average, count) => {
     })
     .where(eq(recipesTable.id, recipeId))
 }
+
+export const addFavorite = async (userId, recipeId) => {
+  return await db.insert(favoritesTable).values({ userId, recipeId });
+};
+
+export const removeFavorite = async (userId, recipeId) => {
+  return await db.delete(favoritesTable).where(
+    and(eq(favoritesTable.userId, userId), eq(favoritesTable.recipeId, recipeId))
+  );
+};
+
+export const isFavorite = async (userId, recipeId) => {
+  return await db
+      .select()
+      .from(favoritesTable)
+      .where(and(eq(favoritesTable.userId, userId), eq(favoritesTable.recipeId, recipeId))).get();
+}
+

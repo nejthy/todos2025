@@ -6,7 +6,18 @@
           <h5 class="card-title">
             <a href="/recipes/<%= recipe.id %>"><%= recipe.title %>
           </h5>
-         
+          <% if (user && user.id !== recipe.userId) { %>
+            <% if (recipe.isFavorite) { %>
+              <form method="POST" action="/recipes/<%= recipe.id %>/unfavorite">
+                <button class="btn btn-outline-danger">💔 Odebrat z oblíbených</button>
+              </form>
+            <% } else { %>
+              <form method="POST" action="/recipes/<%= recipe.id %>/favorite">
+                <button class="btn btn-outline-primary">❤️ Přidat do oblíbených</button>
+              </form>
+            <% } %>
+          <% } %>
+                  
           <% if (recipe.imagePath) { %>
             <img src="/uploads/<%= recipe.imagePath %>" class="img-fluid mt-2" />
           <% } %></a>

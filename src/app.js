@@ -17,6 +17,9 @@ import {
   updateRating,
   getRatingsForRecipe,
   updateRecipeRatingStats,
+  addFavorite,
+  isFavorite,
+  removeFavorite
 } from "./db.js"
 import { usersRouter } from "./users.js"
 import { getCookie } from "hono/cookie"
@@ -40,13 +43,15 @@ app.use(async (c, next) => {
 app.route("/", usersRouter)
 
 app.get("/", async (c) => {
-  const recipes = await getAllRecipes()
+  const user = c.get("user");
+  const recipes = await getAllRecipes(user?.id);
 
-  const index = await renderFile("views/index.html", {
-    title: "Recepty",
-    recipes,
-    user: c.get("user"),
-  })
+const index = await renderFile("views/index.html", {
+  title: "Recepty",
+  recipes,
+  user,
+});
+
 
   return c.html(index)
 })
@@ -152,14 +157,20 @@ app.post("/recipes/new", async (c) => {
 app.get("/recipes/:id", async (c) => {
   const id = Number(c.req.param("id"))
 
-  const recipe = await getRecipeById(id)
+  const user = c.get("user");
+  const recipe = await getRecipeById(id);
 
-  if (!recipe) return c.notFound()
+let isFavorite = false;
+if (user) {
+  const favorite = await isFavoriteRecipe(user.id, recipe.id);
+  isFavorite = !!favorite;
+}
 
-  const detail = await renderFile("views/detail.html", {
-    recipe,
-    user: c.get("user"), 
-  })
+const detail = await renderFile("views/detail.html", {
+  recipe,
+  user,
+  isFavorite,
+});
 
   return c.html(detail)
 })
@@ -228,40 +239,78 @@ app.get("/recipes/:id/remove", async (c) => {
   return c.redirect("/")
 })
 
+app.post("/recipes/:id/favorite", async (c) => {
+  const id = Number(c.req.param("id"))
+  const user = c.get("user");
+
+  const recipe = await getRecipeById(id)
+  if (!recipe) return c.notFound()
+
+  await addFavorite(user.index,id)
+
+  sendRecipesToAllConnections()
+
+  return c.redirect("/")
+})
+
+app.post("/recipes/:id/unfavorite", async (c) => {
+  const id = Number(c.req.param("id"))
+  const user = c.get("user");
+
+  const recipe = await getRecipeById(id)
+  if (!recipe) return c.notFound()
+
+  await removeFavorite(user,id)
+
+  sendRecipesToAllConnections()
+  sendRecipeDeletedToAllConnections(id)
+
+
+  return c.redirect("/")
+})
 
 /** @type{Set<WSContext<WebSocket>>} */
 const connections = new Set()
 
 app.get(
   "/ws",
-  upgradeWebSocket((c) => {
+  upgradeWebSocket(async (c) => {
+    const token = getCookie(c, "token");
+    const user = await getUserByToken(token); 
+
     return {
       onOpen: (ev, ws) => {
-        connections.add(ws)
+        ws.user = user; 
+        connections.add(ws);
       },
-      onClose: (evt, ws) => {
-        connections.delete(ws)
+      onClose: (ev, ws) => {
+        connections.delete(ws);
       },
-    }
+    };
   })
-)
+);
+
 
 const sendRecipesToAllConnections = async () => {
-  const recipes = await getAllRecipes()
-
-  const rendered = await renderFile("views/_recipes.html", {
-    recipes,
-  })
-
   for (const connection of connections.values()) {
+    const user = connection.user || null;
+
+    const recipes = await getAllRecipes(user?.id);
+
+    const rendered = await renderFile("views/_recipes.html", {
+      recipes,
+      user,
+    });
+
     const data = JSON.stringify({
       type: "recipes",
       html: rendered,
-    })
+    });
 
-    connection.send(data)
+    connection.send(data);
   }
-}
+};
+
 
 const sendRecipeDetailToAllConnections = async (id) => {
   const recipe = await getRecipeById(id)
