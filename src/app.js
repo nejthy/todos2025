@@ -24,6 +24,7 @@ import {
 import { usersRouter } from "./users.js"
 import { getCookie } from "hono/cookie"
 import path from "path";
+import { title } from 'process'
 
 
 export const app = new Hono()
@@ -152,6 +153,20 @@ app.post("/recipes/new", async (c) => {
 });
 
 
+app.get("/recipes/favorites", async (c) => {
+  const user = c.get("user");
+
+  const all = await getAllRecipes(user.id)
+  const recipes = all.filter(r => r.isFavorite)
+
+const favorites = await renderFile("views/favorites.html", {
+  title: "Oblíbené recepty",
+  recipes,
+  user,
+});
+
+  return c.html(favorites)
+})
 
 
 app.get("/recipes/:id", async (c) => {
@@ -162,9 +177,9 @@ app.get("/recipes/:id", async (c) => {
 
 
 const detail = await renderFile("views/detail.html", {
+  title: "Oblíbené recepty",
   recipe,
   user,
-  isFavorite
 });
 
   return c.html(detail)
