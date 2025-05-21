@@ -164,6 +164,7 @@ app.get("/recipes/:id", async (c) => {
 const detail = await renderFile("views/detail.html", {
   recipe,
   user,
+  isFavorite
 });
 
   return c.html(detail)
@@ -206,7 +207,7 @@ app.post("/recipes/:id", async (c) => {
     const filepath = path.join("public", "uploads", filename);
     const buffer = Buffer.from(await image.arrayBuffer());
   
-    await sharp(buffer).resize({width: 300}).toFile(filepath),
+    await sharp(buffer).resize({width: 400, height: 300}).toFile(filepath),
     values.imagePath = filename;
   
   }
