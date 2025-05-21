@@ -1,66 +1,72 @@
+<%- include('_menu.html') %>
 
-    <%- include('_menu.html') %>
-
-    <a href="/" class="btn btn-sm btn-outline-secondary">← Zpět na recepty</a>
-    <hr />
-
-    <hr />
-      <h2>Nový recept</h2>
-      <form action="/recipes/new" method="post"  enctype="multipart/form-data">
-        <div class="mb-3">
-          <label for="title" class="form-label">Název receptu</label>
-          <input type="text" name="title" id="title" class="form-control" required />
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white">
+          <h2 class="card-title mb-0">Nový recept</h2>
         </div>
-    
-        <div class="mb-3">
-          <label class="form-label">Ingredience</label>
-          <div id="ingredients-list">
-            <div class="d-flex mb-2">
-              <input type="text" name="ingredients[]" class="form-control me-2" placeholder="Napiš ingredienci" required />
-              <button type="button" class="btn btn-outline-secondary" onclick="addIngredient()">+</button>
+        <div class="card-body">
+          <form action="/recipes/new" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+              <label for="title" class="form-label">Název receptu</label>
+              <input type="text" name="title" id="title" class="form-control" required />
             </div>
-          </div>
-        </div>
         
-        <div class="mb-3">
-          <label for="category" class="form-label">Kategorie</label>
-          <select name="category" id="category" class="form-select" required>
-            <option value="">-- Vyber kategorii --</option>
-            <option value="Snídaně">Snídaně</option>
-            <option value="Hlavni-jidlo">Hlavni-jidlo</option>
-            <option value="Dezert">Dezert</option>
-            <option value="Svačina">Svačina</option>
-          </select>
-        </div>
+            <div class="mb-3">
+              <label class="form-label">Ingredience</label>
+              <div id="ingredients-list">
+                <div class="d-flex mb-2">
+                  <input type="text" name="ingredients[]" class="form-control me-2" placeholder="Napiš ingredienci" required />
+                  <button type="button" class="btn btn-outline-secondary" onclick="addIngredient()">+</button>
+                </div>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="category" class="form-label">Kategorie</label>
+              <select name="category" id="category" class="form-select" required>
+                <option value="">-- Vyber kategorii --</option>
+                <option value="Snídaně">Snídaně</option>
+                <option value="Hlavni-jidlo">Hlavní jídlo</option>
+                <option value="Dezert">Dezert</option>
+                <option value="Svačina">Svačina</option>
+              </select>
+            </div>
+            
+            <div class="mb-3">
+              <label for="steps" class="form-label">Postup</label>
+              <textarea name="steps" id="steps" rows="5" class="form-control" required></textarea>
+            </div>
+    
+            <div class="mb-3">
+              <label for="image" class="form-label">Obrázek receptu</label>
+              <input type="file" name="image" id="image" class="form-control" accept="image/*" />
+            </div>
         
-        <div class="mb-3">
-          <label for="steps" class="form-label">Postup</label>
-          <textarea name="steps" id="steps" rows="5" class="form-control" required></textarea>
+            <div class="d-flex justify-content-between">
+              <a href="/" class="btn btn-outline-secondary">← Zpět na recepty</a>
+              <button type="submit" class="btn btn-primary">Uložit</button>
+            </div>
+          </form>
         </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-        <div class="mb-3">
-          <label for="image" class="form-label">Obrázek receptu</label>
-          <input type="file" name="image" id="image" class="form-control" accept="image/*" />          
-        </div>
-    
-    
-        <button type="submit" class="btn btn-primary">Uložit</button>
-      </form>
-    
-      <script>
-        function addIngredient() {
-          const container = document.getElementById("ingredients-list");
-          const div = document.createElement("div");
-          div.className = "d-flex mb-2";
-      
-          div.innerHTML = `
-            <input type="text" name="ingredients[]" class="form-control me-2" placeholder="Další ingredience" required />
-            <button type="button" class="btn btn-outline-danger" onclick="this.parentNode.remove()">−</button>
-          `;
-      
-          container.appendChild(div);
-        }
-      </script>
-      
-  </body>
-  </html>
+<script>
+  function addIngredient() {
+    const container = document.getElementById("ingredients-list");
+    const div = document.createElement("div");
+    div.className = "d-flex mb-2";
+
+    div.innerHTML = `
+      <input type="text" name="ingredients[]" class="form-control me-2" placeholder="Další ingredience" required />
+      <button type="button" class="btn btn-outline-danger" onclick="this.parentNode.remove()">−</button>
+    `;
+
+    container.appendChild(div);
+  }
+</script>
