@@ -3,24 +3,24 @@
     <div class="col-md-6 mb-4">
       <div class="card h-100">
         <div class="card-body">
-          <h5 class="card-title">
-            <a href="/recipes/<%= recipe.id %>"><%= recipe.title %>
-          </h5>
-          <% if (user && user.id !== recipe.userId) { %>
-            <% if (recipe.isFavorite) { %>
-              <form method="POST" action="/recipes/<%= recipe.id %>/unfavorite">
-                <button class="btn btn-outline-danger">💔 Odebrat z oblíbených</button>
-              </form>
-            <% } else { %>
-              <form method="POST" action="/recipes/<%= recipe.id %>/favorite">
-                <button class="btn btn-outline-primary">❤️ Přidat do oblíbených</button>
+          <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="card-title mb-0">
+              <a href="/recipes/<%= recipe.id %>" class="text-dark text-decoration-none"><%= recipe.title %>
+            </h5>
+            <% if (user && user.id !== recipe.userId) { %>
+              <form method="POST" action="/recipes/<%= recipe.id %>/<%= recipe.isFavorite ? 'unfavorite' : 'favorite' %>" class="d-inline">
+                <button type="submit" class="btn btn-link p-0 border-0">
+                  <i class="bi <%= recipe.isFavorite ? 'bi-heart-fill text-danger' : 'bi-heart' %>" style="font-size: 1.5rem;"></i>
+                </button>
               </form>
             <% } %>
-          <% } %>
+          </div>
+          
+          
                   
           <% if (recipe.imagePath) { %>
-            <img src="/uploads/<%= recipe.imagePath %>" class="img-fluid mt-2" />
-          <% } %></a>
+            <img src="/uploads/<%= recipe.imagePath %>" class="img-fluid mt-2 d-block mx-auto" />
+            <% } %></a>
           <% if (recipe.user && recipe.user.username) { %>
             <p class="mb-1"><strong>Autor:</strong> <%= recipe.user.username %></p>
           <% } %>

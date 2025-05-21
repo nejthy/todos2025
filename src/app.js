@@ -18,8 +18,8 @@ import {
   getRatingsForRecipe,
   updateRecipeRatingStats,
   addFavorite,
-  isFavorite,
-  removeFavorite
+  removeFavorite,
+  isFavorite
 } from "./db.js"
 import { usersRouter } from "./users.js"
 import { getCookie } from "hono/cookie"
@@ -160,16 +160,10 @@ app.get("/recipes/:id", async (c) => {
   const user = c.get("user");
   const recipe = await getRecipeById(id);
 
-let isFavorite = false;
-if (user) {
-  const favorite = await isFavoriteRecipe(user.id, recipe.id);
-  isFavorite = !!favorite;
-}
 
 const detail = await renderFile("views/detail.html", {
   recipe,
   user,
-  isFavorite,
 });
 
   return c.html(detail)
@@ -246,7 +240,8 @@ app.post("/recipes/:id/favorite", async (c) => {
   const recipe = await getRecipeById(id)
   if (!recipe) return c.notFound()
 
-  await addFavorite(user.index,id)
+  await addFavorite(user.id, id)
+
 
   sendRecipesToAllConnections()
 
@@ -260,7 +255,7 @@ app.post("/recipes/:id/unfavorite", async (c) => {
   const recipe = await getRecipeById(id)
   if (!recipe) return c.notFound()
 
-  await removeFavorite(user,id)
+  await removeFavorite(user.id,id)
 
   sendRecipesToAllConnections()
   sendRecipeDeletedToAllConnections(id)
