@@ -215,3 +215,21 @@ export const createComment = async (recipeId, userId, content) => {
       content,
     })
 }
+
+export const deleteComment = async (commentId) => {
+  const comment = await db
+    .delete(commentsTable)
+    .where(eq(commentsTable.id, commentId))
+
+  return comment
+}
+
+export const getCommentById = async (commentId) => {
+  const comment = await db
+  .select()
+  .from(commentsTable)
+  .where(eq(commentsTable.id, commentId))
+  .get()
+
+return comment
+}

@@ -19,9 +19,9 @@ import {
   updateRecipeRatingStats,
   addFavorite,
   removeFavorite,
-  isFavorite,
-  createComment,
-  getCommentsByRecipe
+deleteComment,  createComment,
+  getCommentsByRecipe,
+  getCommentById
 } from "./db.js"
 import { usersRouter } from "./users.js"
 import { getCookie } from "hono/cookie"
@@ -298,6 +298,24 @@ app.post("/recipes/:id/comments", async (c) => {
 
   const comment = await createComment(id,userId,content)
   return c.redirect(`/recipes/${id}`);
+
+})
+
+app.post("/comments/:id/delete",async (c) => {
+  const user = c.get("user");
+  if (!user) return c.redirect("/login");
+
+  const commentId = Number(c.req.param("id"));
+
+  const comment = await getCommentById(commentId);
+  if (!comment || comment.userId !== user.id) {
+    return c.text("Nemáte oprávnění", 403);
+  }
+
+  await deleteComment(commentId)
+
+  return c.redirect(`/recipes/${comment.recipeId}`);
+
 
 })
 

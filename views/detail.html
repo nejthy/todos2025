@@ -82,13 +82,11 @@
         </div>
       <% } %>
     </div>
-
     <div id="recipe-view" style="display: block;">
+
        <%- include('_comments.html', { recipe, user, comments }) %>
-    </div>
 
-    
-
+</div>
     <script>
       const ws = new WebSocket("ws://localhost:3000/ws");
       ws.addEventListener("message", (evt) => {
