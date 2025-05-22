@@ -1,0 +1,30 @@
+<h3>Komentáře</h3>
+
+<% if (user) { %>
+  <form action="/recipes/<%= recipe.id %>/comments" method="post" class="mb-4">
+    <div class="mb-2">
+      <textarea name="content" class="form-control" rows="3" placeholder="Napište komentář..." required></textarea>
+    </div>
+    <button type="submit" class="btn btn-sm btn-primary">Přidat komentář</button>
+  </form>
+<% } else { %>
+  <p><a href="/login">Přihlaste se</a> pro přidání komentáře.</p>
+<% } %>
+
+<% if (comments.length) { %>
+  <ul class="list-group mb-4">
+    <% comments.forEach(cmnt => { %>
+      <li class="list-group-item">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <strong><i class="bi bi-person-circle me-1"></i><%= cmnt.user.username %></strong>
+            <p class="mb-1"><%= cmnt.content %></p>
+          </div>
+          <small class="text-muted"><i class="bi bi-clock me-1"></i><%= new Date(cmnt.createdAt).toLocaleString("cs-CZ") %></small>
+        </div>
+      </li>
+    <% }) %>
+  </ul>
+<% } else { %>
+  <p class="text-muted">Zatím žádné komentáře.</p>
+<% } %>

@@ -1,6 +1,6 @@
 import { drizzle } from "drizzle-orm/libsql"
 import { eq } from "drizzle-orm"
-import { recipesTable, usersTable, ratingsTable, favoritesTable } from "./schema.js"
+import { recipesTable, usersTable, ratingsTable, favoritesTable, commentsTable } from "./schema.js"
 import crypto from 'crypto'
 import { and } from "drizzle-orm"
 
@@ -191,3 +191,27 @@ export const isFavorite = async (userId, recipeId) => {
       .where(and(eq(favoritesTable.userId, userId), eq(favoritesTable.recipeId, recipeId))).get();
 }
 
+export const getCommentsByRecipe = async (recipeId) => {
+  const results = await db
+    .select()
+    .from(commentsTable)
+    .leftJoin(usersTable, eq(commentsTable.userId, usersTable.id))
+    .where(eq(commentsTable.recipeId, recipeId))
+    .orderBy(commentsTable.createdAt, 'asc')
+    .all();
+
+  return results.map(r => ({
+    ...r.comments,
+    user: r.users,
+  }));
+};
+
+export const createComment = async (recipeId, userId, content) => {
+  return await db
+    .insert(commentsTable)
+    .values({
+      userId,
+      recipeId,
+      content,
+    })
+}

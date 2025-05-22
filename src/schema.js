@@ -3,8 +3,9 @@ import {
   int,
   text,
   real,
+  
 } from "drizzle-orm/sqlite-core"
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 
 export const recipesTable = sqliteTable("recipes", {
   id: int().primaryKey({ autoIncrement: true }),
@@ -40,6 +41,15 @@ export const favoritesTable = sqliteTable("favorites", {
   recipeId: int().references(() => recipesTable.id),
 });
 
+export const commentsTable = sqliteTable("comments", {
+  id: int().primaryKey({ autoIncrement: true }),
+  userId: int().notNull().references(() => usersTable.id),
+  recipeId: int().notNull().references(() => recipesTable.id),
+  content: text().notNull(),
+  createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`)
+});
+
+
 export const recipesRelations = relations(recipesTable, ({ one, many }) => ({
   user: one(usersTable, {
     fields: [recipesTable.userId],
@@ -47,8 +57,6 @@ export const recipesRelations = relations(recipesTable, ({ one, many }) => ({
   }),
   ratings: many(ratingsTable),
 }));
-
-
 
 export const usersRelations = relations(usersTable, ({ many }) => ({
   recipes: many(recipesTable),
@@ -69,4 +77,15 @@ export const ratingsRelations = relations(ratingsTable, ({ one }) => ({
 export const favoritesRelations = relations(favoritesTable, ({ one }) => ({
   user: one(usersTable, { fields: [favoritesTable.userId], references: [usersTable.id] }),
   recipe: one(recipesTable, { fields: [favoritesTable.recipeId], references: [recipesTable.id] }),
+}));
+
+export const commentsRelations = relations(commentsTable, ({ one }) => ({
+  user: one(usersTable, {
+    fields: [commentsTable.userId],
+    references: [usersTable.id],
+  }),
+  recipe: one(recipesTable, {
+    fields: [commentsTable.recipeId],
+    references: [recipesTable.id],
+  }),
 }));

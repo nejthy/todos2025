@@ -19,7 +19,9 @@ import {
   updateRecipeRatingStats,
   addFavorite,
   removeFavorite,
-  isFavorite
+  isFavorite,
+  createComment,
+  getCommentsByRecipe
 } from "./db.js"
 import { usersRouter } from "./users.js"
 import { getCookie } from "hono/cookie"
@@ -174,12 +176,15 @@ app.get("/recipes/:id", async (c) => {
 
   const user = c.get("user");
   const recipe = await getRecipeById(id);
+  const comments = await getCommentsByRecipe(id);
+
 
 
 const detail = await renderFile("views/detail.html", {
   title: "Oblíbené recepty",
   recipe,
   user,
+  comments
 });
 
   return c.html(detail)
@@ -276,8 +281,24 @@ app.post("/recipes/:id/unfavorite", async (c) => {
   sendRecipesToAllConnections()
   sendRecipeDeletedToAllConnections(id)
 
+  const referer = c.req.header("Referer") || "/"
+  return c.redirect(referer)
+})
 
-  return c.redirect("/")
+app.post("/recipes/:id/comments", async (c) => {
+  const id = Number(c.req.param("id"))
+  const user = c.get("user")
+  if (!user) {
+    return c.redirect("/login");
+  }
+  const userId = user.id; 
+  const form = await c.req.formData();
+
+  const content = form.get("content")?.toString().trim();
+
+  const comment = await createComment(id,userId,content)
+  return c.redirect(`/recipes/${id}`);
+
 })
 
 /** @type{Set<WSContext<WebSocket>>} */
@@ -351,6 +372,10 @@ const sendRecipeDeletedToAllConnections = async (id) => {
     connection.send(data)
   }
 }
+
+
+
+
 
 
 
