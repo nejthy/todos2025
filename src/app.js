@@ -26,7 +26,7 @@ deleteComment,  createComment,
 import { usersRouter } from "./users.js"
 import { getCookie } from "hono/cookie"
 import path from "path";
-import { title } from 'process'
+import { filterRecipes } from "./filter.js"
 
 
 export const app = new Hono()
@@ -47,17 +47,19 @@ app.route("/", usersRouter)
 
 app.get("/", async (c) => {
   const user = c.get("user");
-  const recipes = await getAllRecipes(user?.id);
+  const all = await getAllRecipes(user?.id);
 
-const index = await renderFile("views/index.html", {
+  const { recipes, filterData } = filterRecipes(all, c.req.query());
+  const html = await renderFile("views/index.html", {
   title: "Recepty",
-  recipes,
   user,
+  recipes,
+  ...filterData,
+  filterAction: "/"
 });
 
-
-  return c.html(index)
-})
+  return c.html(html);
+});
 
 app.get("/recipes/new", async (c) => {
   const user = c.get("user");
@@ -157,18 +159,19 @@ app.post("/recipes/new", async (c) => {
 
 app.get("/recipes/favorites", async (c) => {
   const user = c.get("user");
+  if (!user) return c.redirect("/login");
+  const all = await getFavoriteRecipes(user.id);
 
-  const all = await getAllRecipes(user.id)
-  const recipes = all.filter(r => r.isFavorite)
-
-const favorites = await renderFile("views/favorites.html", {
-  title: "Oblíbené recepty",
-  recipes,
-  user,
+  const { recipes, filterData } = filterRecipes(all, c.req.query());
+  const html = await renderFile("views/index.html", {
+    title: "Oblíbené recepty",
+    user,
+    recipes,
+    ...filterData,
+    filterAction: "/recipes/favorites"   
+  });
+  return c.html(html);
 });
-
-  return c.html(favorites)
-})
 
 
 app.get("/recipes/:id", async (c) => {
@@ -296,7 +299,7 @@ app.post("/recipes/:id/comments", async (c) => {
 
   const content = form.get("content")?.toString().trim();
 
-  const comment = await createComment(id,userId,content)
+  await createComment(id,userId,content)
   return c.redirect(`/recipes/${id}`);
 
 })
@@ -364,19 +367,22 @@ const sendRecipesToAllConnections = async () => {
 
 const sendRecipeDetailToAllConnections = async (id) => {
   const recipe = await getRecipeById(id)
+  const comments = await getCommentsByRecipe(id);
 
-  const rendered = await renderFile("views/_recipe.html", {
-    recipe,
-  })
+  for (const connection of connections) {
+    const user = connection.user || null
 
-  for (const connection of connections.values()) {
-    const data = JSON.stringify({
-      type: "recipe",
-      id,
-      html: rendered,
+    const html = await renderFile("views/_recipe.html", {
+      recipe,
+      user,
+      comments,
     })
 
-    connection.send(data)
+    connection.send(JSON.stringify({
+      type: "recipe",
+      id: recipe,
+      html,
+    }))
   }
 }
 

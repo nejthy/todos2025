@@ -1,0 +1,33 @@
+<aside class="col-12 col-md-3 mb-4">
+  <form id="filter-form" method="get" action="<%= filterAction %>">
+    <h5>Kategorie</h5>
+    <% categories.forEach(cat => { %>
+      <div class="form-check">
+        <input
+          class="form-check-input"
+          type="checkbox"
+          name="category"
+          id="cat-<%= cat %>"
+          value="<%= cat %>"
+          <%= selectedCategories.includes(cat) ? 'checked' : '' %>/>
+        <label class="form-check-label" for="cat-<%= cat %>"><%= cat %></label>
+      </div>
+    <% }) %>
+    
+
+    <h5 class="mt-4">Ingredience</h5>
+    <% ingredientsList.forEach(ing => { %>
+      <div class="form-check">
+        <input class="form-check-input"
+               type="checkbox"
+               name="ingredients"
+               id="ing-<%= ing %>"
+               value="<%= ing %>"
+               <%= selectedIngredients.includes(ing) ? 'checked' : '' %>/>
+        <label class="form-check-label" for="ing-<%= ing %>"><%= ing %></label>
+      </div>
+    <% }) %>
+
+    <button type="submit" class="btn btn-primary btn-sm mt-3">Filtruj</button>
+  </form>
+</aside>

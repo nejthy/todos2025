@@ -21,7 +21,6 @@
       (<%= recipe.votesCount || 0 %> hlasů)
     </p>
 
-    <!-- Formulář pro přidání hodnocení -->
     <form method="POST" action="/recipes/<%= recipe.id %>/rate" class="d-flex align-items-center gap-2">
       <label for="rating-<%= recipe.id %>" class="form-label m-0">Dej hodnocení:</label>
       <select name="rating" id="rating-<%= recipe.id %>" class="form-select form-select-sm w-auto">
@@ -34,4 +33,54 @@
       <button type="submit" class="btn btn-sm btn-primary">Odeslat</button>
     </form>
   </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <h3 class="card-title">Komentáře</h3>
+
+    <% if (user) { %>
+      <form action="/recipes/<%= recipe.id %>/comments" method="post" class="mb-4">
+        <textarea name="content" class="form-control mb-2" rows="3" placeholder="Napište komentář..." required></textarea>
+        <button type="submit" class="btn btn-sm btn-primary">Přidat komentář</button>
+      </form>
+    <% } else { %>
+      <p><a href="/login">Přihlaste se</a> pro přidání komentáře.</p>
+    <% } %>
+
+    <% if (comments.length) { %>
+      <ul class="list-group">
+        <% comments.forEach(cmnt => { %>
+          <li class="list-group-item mb-2 shadow-sm rounded">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <strong><i class="bi bi-person me-1"></i><%= cmnt.user.username %></strong>
+                <p class="mb-1"><%= cmnt.content %></p>
+              </div>
+              <div class="d-flex align-items-center">
+                <small class="text-muted me-2">
+                  <i class="bi bi-clock me-1"></i>
+                  <%= new Date(cmnt.createdAt).toLocaleString("cs-CZ") %>
+                </small>
+                <% if (user && user.id === cmnt.userId) { %>
+                  <form method="POST" action="/comments/<%= cmnt.id %>/delete">
+                    <button type="submit" 
+                            class="btn btn-sm btn-outline-danger"
+                            title="Smazat komentář">
+                      Smazat
+                    </button>
+                  </form>
+                <% } %>
+              </div>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+      
+    <% } else { %>
+      <p class="text-muted">Zatím žádné komentáře.</p>
+    <% } %>
+
+  </div>
+</div>
 </div>

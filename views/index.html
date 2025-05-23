@@ -1,25 +1,32 @@
+<%- include('menu.html') %>
 
-    <%- include('_menu.html') %>
+<header class="container mt-4">
+  <h1 class="mb-4 text-center"><%= title.toUpperCase() %></h1>
+</header>
 
-    <header class="container mt-4">
-      <h1 class="mb-4 text-center"><%= title.toUpperCase() %></h1>
-    </header>
+<main class="container">
+  <div class="row">
+    
+    <%- include('sidebar.html') %>
 
-    <main class="container">
+
+
+    <section class="col-12 col-md-9">
       <div id="recipes">
-        <%- include('_recipes.html') %>
+        <%- include('_recipes.html', { recipes }) %>
       </div>
-    </main>
+    </section>
+  </div>
+</main>
 
-   
-    <script>
-      const ws = new WebSocket("ws://localhost:3000/ws");
-      ws.addEventListener("message", (evt) => {
-        const { type, html } = JSON.parse(evt.data);
-        if (type === "recipes") {
-          document.getElementById("recipes").innerHTML = html;
-        }
-      });
-    </script>
-  </body>
+<script>
+  const ws = new WebSocket("ws://localhost:3000/ws");
+  ws.addEventListener("message", (evt) => {
+    const { type, html } = JSON.parse(evt.data);
+    if (type === "recipes") {
+      document.getElementById("recipes").innerHTML = html;
+    }
+  });
+</script>
+</body>
 </html>

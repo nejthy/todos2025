@@ -16,7 +16,7 @@ export const recipesTable = sqliteTable("recipes", {
   votesCount: int().default(0),     
   userId: int().references(() => usersTable.id),
   imagePath: text(),
-  category: text({ enum: ["Snídaně", "Hlavní jídlo", "Dezert","Svačina"] })
+  category: text({ enum: ["Snídaně", "Hlavní jídlo", "Dezert", "Svačina"] })
   .notNull()
   .default("Hlavní jídlo"),
 })
