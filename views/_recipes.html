@@ -25,7 +25,15 @@
           <p class="mb-0">
             <strong>Hodnocení:</strong>
             <%= recipe.averageRating ? recipe.averageRating.toFixed(1) : "Žádné hodnocení zatím" %> ★
-            (<%= recipe.votesCount || 0 %> hlasů)
+            (<% if (recipe.votesCount === 1) { %>
+              <%= recipe.votesCount %> hlas
+            <% } else if (recipe.votesCount > 1 && recipe.votesCount < 5) { %>
+              <%= recipe.votesCount %> hlasy
+            <% } else { %>
+              <%= recipe.votesCount %> hlasů
+            <% } %>
+            )
+
           </p>
           <div>
             <strong>Kategorie:</strong> <%= recipe.category %>

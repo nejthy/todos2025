@@ -21,7 +21,7 @@ import {
   removeFavorite,
 deleteComment,  createComment,
   getCommentsByRecipe,
-  getCommentById
+  getCommentById,
 } from "./db.js"
 import { usersRouter } from "./users.js"
 import { getCookie } from "hono/cookie"
@@ -49,15 +49,21 @@ app.get("/", async (c) => {
   const user = c.get("user");
   const all = await getAllRecipes(user?.id);
 
-  const { recipes, filterData } = filterRecipes(all, c.req.query());
-  const html = await renderFile("views/index.html", {
-  title: "Recepty",
-  user,
-  recipes,
-  ...filterData,
-  filterAction: "/"
-});
+  const url = new URL(c.req.url, "http://dummy");
+  const rawParams = url.searchParams;
+  const query = {
+    category: rawParams.getAll("category"),
+    ingredients: rawParams.getAll("ingredients"),
+  };
 
+  const { recipes, filterData } = filterRecipes(all, query);
+  const html = await renderFile("views/index.html", {
+    title: "Recepty",
+    user,
+    recipes,
+    ...filterData,
+    filterAction: "/",
+  });
   return c.html(html);
 });
 
@@ -71,6 +77,31 @@ app.get("/recipes/new", async (c) => {
   return c.html(html);
 });
 
+app.get("/recipes/favorites", async (c) => {
+  const user = c.get("user")
+  if (!user) return c.redirect("/login")
+
+  const all = await getAllRecipes(user.id)
+  const favs = all.filter(r => r.isFavorite)
+
+  const url = new URL(c.req.url, "http://dummy")  
+  const rawParams = url.searchParams
+  const query = {
+    category: rawParams.getAll("category"),        
+    ingredients: rawParams.getAll("ingredients"),  
+  }
+
+  const { recipes, filterData } = filterRecipes(favs, query)
+
+  const html = await renderFile("views/index.html", {
+    title: "Oblíbené recepty",
+    user,
+    recipes,
+    ...filterData,
+    filterAction: "/recipes/favorites",
+  })
+  return c.html(html)
+})
 
 
 app.post("/recipes/:id/rate", async (c) => {
@@ -157,22 +188,6 @@ app.post("/recipes/new", async (c) => {
 });
 
 
-app.get("/recipes/favorites", async (c) => {
-  const user = c.get("user");
-  if (!user) return c.redirect("/login");
-  const all = await getFavoriteRecipes(user.id);
-
-  const { recipes, filterData } = filterRecipes(all, c.req.query());
-  const html = await renderFile("views/index.html", {
-    title: "Oblíbené recepty",
-    user,
-    recipes,
-    ...filterData,
-    filterAction: "/recipes/favorites"   
-  });
-  return c.html(html);
-});
-
 
 app.get("/recipes/:id", async (c) => {
   const id = Number(c.req.param("id"))
@@ -256,6 +271,7 @@ app.get("/recipes/:id/remove", async (c) => {
 
   return c.redirect("/")
 })
+
 
 app.post("/recipes/:id/favorite", async (c) => {
   const id = Number(c.req.param("id"))

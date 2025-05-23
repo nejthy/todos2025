@@ -18,7 +18,14 @@
     <p>
       <strong>Hodnocení:</strong>
       <%= recipe.averageRating ? recipe.averageRating.toFixed(1) : "Žádné hodnocení zatím" %> ★
-      (<%= recipe.votesCount || 0 %> hlasů)
+      (<% if (recipe.votesCount === 1) { %>
+        <%= recipe.votesCount %> hlas
+      <% } else if (recipe.votesCount > 1 && recipe.votesCount < 5) { %>
+        <%= recipe.votesCount %> hlasy
+      <% } else { %>
+        <%= recipe.votesCount %> hlasů
+      <% } %>
+      )
     </p>
 
     <form method="POST" action="/recipes/<%= recipe.id %>/rate" class="d-flex align-items-center gap-2">

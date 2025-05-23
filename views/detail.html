@@ -6,7 +6,7 @@
         <a href="/" class="btn btn-sm btn-outline-secondary">← Zpět na recepty</a>
         <% if (user && user.id === recipe.userId) { %>
           <button type="button" class="btn btn-warning" onclick="toggleEdit()">
-            ✏️ Upravit recept
+            Upravit recept
           </button>
         <% } %>
       </div>
@@ -51,10 +51,10 @@
                   <label for="category" class="form-label">Kategorie</label>
                   <select name="category" id="category" class="form-select" required>
                     <option value="">-- Vyber kategorii --</option>
-                    <option value="dezert" <%= recipe.category === "Dezert" ? "selected" : "" %>>Dezert</option>
-                    <option value="hlavni-jidlo" <%= recipe.category === "Hlavní jídlo" ? "selected" : "" %>>Hlavní jídlo</option>
-                    <option value="snidane" <%= recipe.category === "Snídaně" ? "selected" : "" %>>Snídaně</option>
-                    <option value="napoj" <%= recipe.category === "Svačina" ? "selected" : "" %>>Svačina</option>
+                    <option value="Dezert" <%= recipe.category === "Dezert" ? "selected" : "" %>>Dezert</option>
+                    <option value="Hlavní jídlo" <%= recipe.category === "Hlavní jídlo" ? "selected" : "" %>>Hlavní jídlo</option>
+                    <option value="Snídaně" <%= recipe.category === "Snídaně" ? "selected" : "" %>>Snídaně</option>
+                    <option value="Svačina" <%= recipe.category === "Svačina" ? "selected" : "" %>>Svačina</option>
                   </select>
                 </div>
 
@@ -72,8 +72,8 @@
                 </div>
 
                 <div class="d-flex">
-                  <button type="submit" class="btn btn-primary">💾 Uložit</button>
-                  <a href="/recipes/<%= recipe.id %>/remove" class="btn btn-danger ms-2">🗑️ Odstranit</a>
+                  <button type="submit" class="btn btn-primary"> Uložit</button>
+                  <a href="/recipes/<%= recipe.id %>/remove" class="btn btn-danger ms-2"> Odstranit</a>
                 </div>
               </form>
             </div>

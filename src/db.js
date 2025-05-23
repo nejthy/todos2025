@@ -191,6 +191,8 @@ export const isFavorite = async (userId, recipeId) => {
       .where(and(eq(favoritesTable.userId, userId), eq(favoritesTable.recipeId, recipeId))).get();
 }
 
+
+
 export const getCommentsByRecipe = async (recipeId) => {
   const results = await db
     .select()
