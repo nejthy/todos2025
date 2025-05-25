@@ -9,7 +9,21 @@
       rel="stylesheet"
     />
   </head>
-  <body class="bg-light d-flex justify-content-center align-items-center vh-100">
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
+      <div class="container">
+        <a class="navbar-brand fw-bold" href="/">🥘 Receptář</a>
+    
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+    
+        <div class="collapse navbar-collapse justify-content-end" id="navContent">
+          <ul class="navbar-nav align-items-center">      
+        </div>
+      </div>
+    </nav>
+  <div class="bg-light d-flex justify-content-center align-items-center vh-100">
     <div class="card shadow-sm p-4" style="min-width: 320px; max-width: 400px; width: 100%;">
       <% if (flash) { %>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -56,6 +70,7 @@
         <button type="submit" class="btn btn-primary w-100 mb-2">Registrovat se</button>
         Už máte účet? <a href="/login" >Přihlásit se</a>
       </form>
+    </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
