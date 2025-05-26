@@ -24,7 +24,7 @@ export function filterRecipes(allRecipes, query) {
   if (selectedIngredients.length) {
     recipes = recipes.filter(r => {
       const ings = r.ingredients.split(",").map(i => i.trim());
-      return selectedIngredients.every(si => ings.includes(si));
+      return selectedIngredients.some(si => ings.includes(si));
     });
   }
 
