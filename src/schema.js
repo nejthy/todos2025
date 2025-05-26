@@ -3,7 +3,6 @@ import {
   int,
   text,
   real,
-  
 } from "drizzle-orm/sqlite-core"
 import { relations, sql } from "drizzle-orm"
 
@@ -14,11 +13,12 @@ export const recipesTable = sqliteTable("recipes", {
   steps: text().notNull(),       
   averageRating: real().default(0), 
   votesCount: int().default(0),     
-  userId: int().references(() => usersTable.id),
+  userId: int()
+    .references(() => usersTable.id, { onDelete: 'cascade' }),
   imagePath: text(),
   category: text({ enum: ["Snídaně", "Hlavní jídlo", "Dezert", "Svačina"] })
-  .notNull()
-  .default("Hlavní jídlo"),
+    .notNull()
+    .default("Hlavní jídlo"),
 })
 
 export const usersTable = sqliteTable("users", {
@@ -31,24 +31,33 @@ export const usersTable = sqliteTable("users", {
 
 export const ratingsTable = sqliteTable("ratings", {
   id: int().primaryKey({ autoIncrement: true }),
-  userId: int().notNull().references(() => usersTable.id),
-  recipeId: int().notNull().references(() => recipesTable.id),
+  userId: int()
+    .notNull()
+    .references(() => usersTable.id,   { onDelete: 'cascade' }),
+  recipeId: int()
+    .notNull()
+    .references(() => recipesTable.id, { onDelete: 'cascade' }),
   rating: int().notNull(),
 });
 
 export const favoritesTable = sqliteTable("favorites", {
-  userId: int().references(() => usersTable.id),
-  recipeId: int().references(() => recipesTable.id),
+  userId: int()
+    .references(() => usersTable.id,   { onDelete: 'cascade' }),
+  recipeId: int()
+    .references(() => recipesTable.id, { onDelete: 'cascade' }),
 });
 
 export const commentsTable = sqliteTable("comments", {
   id: int().primaryKey({ autoIncrement: true }),
-  userId: int().notNull().references(() => usersTable.id),
-  recipeId: int().notNull().references(() => recipesTable.id),
+  userId: int()
+    .notNull()
+    .references(() => usersTable.id,   { onDelete: 'cascade' }),
+  recipeId: int()
+    .notNull()
+    .references(() => recipesTable.id, { onDelete: 'cascade' }),
   content: text().notNull(),
-  createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`)
+  createdAt: text().notNull().default(sql`CURRENT_TIMESTAMP`),
 });
-
 
 export const recipesRelations = relations(recipesTable, ({ one, many }) => ({
   user: one(usersTable, {
