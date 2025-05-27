@@ -1,3 +1,9 @@
+<style>
+  .hidden-ingredient {
+    display: none;
+  }
+</style>
+
 <aside class="col-12 col-md-3 mb-4">
   <form id="filter-form" method="get" action="<%= filterAction %>">
     <h5>Kategorie</h5>
@@ -13,21 +19,46 @@
         <label class="form-check-label" for="cat-<%= cat %>"><%= cat %></label>
       </div>
     <% }) %>
-    
 
-    <h5 class="mt-4">Ingredience</h5>
-    <% ingredientsList.forEach(ing => { %>
-      <div class="form-check">
-        <input class="form-check-input"
-               type="checkbox"
-               name="ingredients"
-               id="ing-<%= ing %>"
-               value="<%= ing %>"
-               <%= selectedIngredients.includes(ing) ? 'checked' : '' %>/>
-        <label class="form-check-label" for="ing-<%= ing %>"><%= ing %></label>
-      </div>
-    <% }) %>
+    <div class="sidebar">
+      <h5 class="mt-4">Ingredience</h5>
+      <% ingredientsList.forEach((ing, index) => { %>
+        <% if (ing) { %>
+          <div class="form-check <%= index >= 5 ? 'hidden-ingredient' : '' %>">
+            <input class="form-check-input"
+                   type="checkbox"
+                   name="ingredients"
+                   id="ing-<%= ing %>"
+                   value="<%= ing %>"
+                   <%= selectedIngredients.includes(ing) ? 'checked' : '' %> />
+            <label class="form-check-label" for="ing-<%= ing %>"><%= ing %></label>
+          </div>
+        <% } %>
+      <% }) %>
+
+      <% if (ingredientsList.length > 5) { %>
+        <button type="button" id="toggle-button" class="btn btn-sm btn-link mt-2">Zobrazit více</button>
+      <% } %>
+    </div>
 
     <button type="submit" class="btn btn-primary btn-sm mt-3">Filtruj</button>
   </form>
 </aside>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const button = document.getElementById("toggle-button");
+    if (!button) return;
+
+    let expanded = false;
+
+    button.addEventListener("click", function () {
+      const hiddenItems = document.querySelectorAll(".hidden-ingredient");
+      hiddenItems.forEach(item => {
+        item.style.display = expanded ? "none" : "block";
+      });
+      button.textContent = expanded ? "Zobrazit více" : "Zobrazit méně";
+      expanded = !expanded;
+    });
+  });
+</script>
