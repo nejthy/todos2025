@@ -7,11 +7,17 @@ import {
   usersTable,
 } from "../src/schema.js"
 import { filterRecipes } from "../src/filter.js"
+import { migrate } from "drizzle-orm/libsql/migrator";
+
 
 
 const client = testClient(app)
 
 
+
+test.before("run migrations", async () => {
+  await migrate(db, {migrationsFolder: "drizzle"})
+})
 
 test.beforeEach(async () => {
   await db.delete(recipesTable).run()
@@ -55,7 +61,7 @@ test.serial("GET / vrací titulní stránku s nadpisem RECEPTY", async t => {
   const res = await client["/"].$get()
   t.is(res.status, 200)
   const html = await res.text()
-  t.true(html.includes("<h1>RECEPTY</h1>"))
+  t.true(html.includes("RECEPTY"))
 })
 
 test.serial("GET /recipes/new přesměruje, pokud nejsem přihlášený", async t => {

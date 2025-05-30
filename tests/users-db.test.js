@@ -6,13 +6,25 @@ import {
   getUser,
   getUserByToken,
 } from "../src/db.js"
+import { migrate } from "drizzle-orm/libsql/migrator";
+
+
+test.before("run migrations", async () => {
+  await migrate(db, {migrationsFolder: "drizzle"})
+})
+
+
+test.beforeEach(async () => {
+  await db.delete(usersTable).run()
+})
+
 
 test.beforeEach("delete users", async () => {
   await db.delete(usersTable)
 })
 
 test.serial("createUser creates user", async (t) => {
-  await createUser("adam", "heslo")
+  await createUser("naty", "heslo")
 
   const users = await db.select().from(usersTable).all()
 
@@ -20,7 +32,7 @@ test.serial("createUser creates user", async (t) => {
 })
 
 test.serial("getUser gets user", async (t) => {
-  await createUser("adam", "heslo")
+  await createUser("naty", "heslo")
 
   const user = await getUser("adam", "heslo")
 
