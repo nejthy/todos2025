@@ -1,15 +1,15 @@
 {
-  "name": "todos",
+  "name": "recipes",
   "version": "1.0.0",
-  "description": "Todo app",
+  "description": "Recipe app",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "dev": "node --watch index.js",
+    "db:migrate": "drizzle-kit migrate",
     "test": "ava tests",
     "e2e": "playwright test --ui",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:generate": "drizzle-kit generate"
   },
   "author": "Natalie Kuzelova",
   "license": "MIT",

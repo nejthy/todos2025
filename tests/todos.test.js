@@ -8,7 +8,6 @@ import {
   updateTodo,
 } from "../src/db.js"
 import { todosTable } from "../src/schema.js"
-import { migrate } from "drizzle-orm/libsql/migrator"
 
 
 test.beforeEach("delete todos", async () => {
