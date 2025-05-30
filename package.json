@@ -6,9 +6,9 @@
   "type": "module",
   "scripts": {
     "dev": "node --watch index.js",
-    "db:migrate": "drizzle-kit migrate",
     "test": "ava tests",
     "e2e": "playwright test --ui",
+    "db:migrate": "drizzle-kit migrate",
     "db:generate": "drizzle-kit generate"
   },
   "author": "Natalie Kuzelova",
