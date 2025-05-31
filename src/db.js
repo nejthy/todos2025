@@ -9,7 +9,7 @@ import { and } from "drizzle-orm"
 const isTest = process.env.NODE_ENV === "test"
 
 export const db = drizzle({
-  connection: isTest ? "file::memory:" : "file:db.sqlite",
+  connection: isTest ? "file:test-e2e.sqlite" : "file:db.sqlite",
   logger: !isTest,
 })
 
