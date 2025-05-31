@@ -1,11 +1,6 @@
 import { test, expect } from "@playwright/test"
-import { migrate } from "drizzle-orm/libsql/migrator";
 
-test.before("run migrations", async () => {
-  console.log("Spouštím migrace...")
-  await migrate(db, { migrationsFolder: "drizzle" })
-  console.log("Migrace dokončeny!")
-})
+
 
 test("index page has title", async ({ page }) => {
   await page.goto("/")

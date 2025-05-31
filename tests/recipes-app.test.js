@@ -14,11 +14,6 @@ import { migrate } from "drizzle-orm/libsql/migrator";
 const client = testClient(app)
 
 
-
-test.before("run migrations", async () => {
-  await migrate(db, {migrationsFolder: "drizzle"})
-})
-
 test.beforeEach(async () => {
   await db.delete(recipesTable).run()
   await db.delete(usersTable).run()

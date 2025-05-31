@@ -3,15 +3,18 @@ import { eq } from "drizzle-orm"
 import { recipesTable, usersTable, ratingsTable, favoritesTable, commentsTable } from "./schema.js"
 import crypto from 'crypto'
 import { and } from "drizzle-orm"
+import { migrate } from "drizzle-orm/libsql/migrator"
 
 
 
 const isTest = process.env.NODE_ENV === "test"
 
 export const db = drizzle({
-  connection: isTest ? "file:test-e2e.sqlite" : "file:db.sqlite",
+  connection: isTest ? "file::memory:" : "file:db.sqlite",
   logger: !isTest,
 })
+
+await migrate(db, { migrationsFolder: "drizzle" })
 
 
 export const getAllRecipes = async (userId) => {
