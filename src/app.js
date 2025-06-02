@@ -286,7 +286,7 @@ app.post("/recipes/:id/favorite", async (c) => {
 
   sendRecipesToAllConnections()
   
-  return c.redirect(c.req.header("referer") || "/recipes/favorites");
+  return c.redirect(c.req.header("referer") || "/recipes/favorite");
 
 })
 
@@ -304,8 +304,8 @@ app.post("/recipes/:id/unfavorite", async (c) => {
   sendRecipesToAllConnections()
   sendRecipeDeletedToAllConnections(id)
 
-  const referer = c.req.header("Referer") || "/"
-  return c.redirect(referer)
+  return c.redirect(c.req.header("referer") || "/recipes/unfavorite");
+
 })
 
 // přidání komentáře k receptu
