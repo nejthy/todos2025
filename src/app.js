@@ -45,11 +45,12 @@ app.use(async (c, next) => {
 
 app.route("/", usersRouter)
 
+//získá všechny recepty a zobrazí je na hlavní stránce, zároveň i filtruje
 app.get("/", async (c) => {
   const user = c.get("user");
   const all = await getAllRecipes(user?.id);
 
-  const url = new URL(c.req.url, "http://dummy");
+  const url = new URL(c.req.url);
   const rawParams = url.searchParams;
   const query = {
     category: rawParams.getAll("category"),
@@ -67,6 +68,8 @@ app.get("/", async (c) => {
   return c.html(html);
 });
 
+// nový recept, při nepřihlášení přeměruje na login
+
 app.get("/recipes/new", async (c) => {
   const user = c.get("user");
   if (!user) {
@@ -76,6 +79,8 @@ app.get("/recipes/new", async (c) => {
   const html = await renderFile("views/new.recipe.html", { user });
   return c.html(html);
 });
+
+// stranka oblíbené recepty, pokud není přihlášený, přesměruje na login
 
 app.get("/recipes/favorites", async (c) => {
   const user = c.get("user")
@@ -91,7 +96,7 @@ app.get("/recipes/favorites", async (c) => {
     ingredients: rawParams.getAll("ingredients"),  
   }
 
-  const { recipes, filterData } = filterRecipes(favs, query)
+  const { recipes, filterData } =  filterRecipes(favs, query)
 
   const html = await renderFile("views/index.html", {
     title: "Oblíbené recepty",
@@ -103,7 +108,7 @@ app.get("/recipes/favorites", async (c) => {
   return c.html(html)
 })
 
-
+//aktualizace hodnocení receptu
 app.post("/recipes/:id/rate", async (c) => {
   const id = Number(c.req.param("id"));
   const form = await c.req.formData();
@@ -138,15 +143,12 @@ app.post("/recipes/:id/rate", async (c) => {
   sendRecipesToAllConnections();
   sendRecipeDetailToAllConnections(id);
 
-  const path = c.req.path
 
   return c.redirect(`/recipes/${id}`);
 
-
-  
-
 });
 
+// přidání nového receptu
 app.post("/recipes/new", async (c) => {
   const form = await c.req.formData();
   const image = form.get("image");
@@ -188,7 +190,7 @@ app.post("/recipes/new", async (c) => {
 });
 
 
-
+// zobrazení detailu receptu, včetně komentářů
 app.get("/recipes/:id", async (c) => {
   const id = Number(c.req.param("id"))
 
@@ -209,13 +211,11 @@ const detail = await renderFile("views/detail.html", {
 })
 
 
-
+// aktualizace receptu
 app.post("/recipes/:id", async (c) => {
   const id = Number(c.req.param("id"));
   const recipe = await getRecipeById(id);
   if (!recipe) return c.notFound();
-
-
 
   const form = await c.req.formData();
   const image = form.get("image");
@@ -258,6 +258,7 @@ app.post("/recipes/:id", async (c) => {
   return c.redirect(c.req.header("Referer"));
 });
 
+// odstranění receptu
 app.get("/recipes/:id/remove", async (c) => {
   const id = Number(c.req.param("id"))
 
@@ -272,7 +273,7 @@ app.get("/recipes/:id/remove", async (c) => {
   return c.redirect("/")
 })
 
-
+// přidání receptu do oblíbených
 app.post("/recipes/:id/favorite", async (c) => {
   const id = Number(c.req.param("id"))
   const user = c.get("user");
@@ -284,9 +285,12 @@ app.post("/recipes/:id/favorite", async (c) => {
 
 
   sendRecipesToAllConnections()
+  
+  return c.redirect(c.req.header("referer") || "/recipes/favorites");
 
-  return c.redirect("/")
 })
+
+// odstranění receptu z oblíbených
 
 app.post("/recipes/:id/unfavorite", async (c) => {
   const id = Number(c.req.param("id"))
@@ -304,6 +308,8 @@ app.post("/recipes/:id/unfavorite", async (c) => {
   return c.redirect(referer)
 })
 
+// přidání komentáře k receptu
+
 app.post("/recipes/:id/comments", async (c) => {
   const id = Number(c.req.param("id"))
   const user = c.get("user")
@@ -319,6 +325,8 @@ app.post("/recipes/:id/comments", async (c) => {
   return c.redirect(`/recipes/${id}`);
 
 })
+
+// odstranění komentáře k receptu
 
 app.post("/comments/:id/delete",async (c) => {
   const user = c.get("user");

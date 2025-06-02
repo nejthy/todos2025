@@ -1,9 +1,12 @@
 export function filterRecipes(allRecipes, query) {
+
   let selectedCategories = query.category || [];
+
   if (!Array.isArray(selectedCategories)) {
     selectedCategories = [selectedCategories].filter(Boolean);
   }
   let selectedIngredients = query.ingredients || [];
+  
   if (!Array.isArray(selectedIngredients)) {
     selectedIngredients = [selectedIngredients].filter(Boolean);
   }
