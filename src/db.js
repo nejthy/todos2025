@@ -126,6 +126,14 @@ export const getUser = async (username, password) => {
   return user
 }
 
+export const getUniqueUser = async (userName) => {
+  const user = await db.select()
+    .from(usersTable)
+    .where(eq(usersTable.username, userName))
+    .get()
+  return user
+}
+
 export const getUserByToken = async (token) => {
   if (!token) return null
 

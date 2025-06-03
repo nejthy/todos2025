@@ -1,6 +1,6 @@
 import { renderFile } from "ejs"
 import { Hono } from "hono"
-import { createUser, db, getUser } from "./db.js"
+import { createUser, db, getUser, getUniqueUser } from "./db.js"
 import { recipesTable } from "./schema.js"
 import { eq } from "drizzle-orm"
 import { setCookie, getCookie, deleteCookie } from "hono/cookie"
@@ -27,6 +27,13 @@ usersRouter.post("/register", async (c) => {
 
   if (password !== passwordConfirm) {
     return c.html(await renderFile("views/register.html", { flash: "Hesla se neshodují" }));
+  }
+
+  const username = form.get("username");
+  const existingUser = await getUniqueUser(username);
+
+  if (existingUser) {
+    return c.html(await renderFile("views/register.html", { flash: "Toto jméno již existuje" }));
   }
 
   const user = await createUser(
